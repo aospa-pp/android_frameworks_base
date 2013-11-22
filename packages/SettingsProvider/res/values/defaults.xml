@@ -336,6 +336,9 @@
     <!-- Whether wifi is always requested by default. -->
     <bool name="def_enable_wifi_always_requested">false</bool>
 
+    <!-- Default for Settings.Global.TETHER_DUN_REQUIRED -->
+    <integer name="def_tether_dun_required">0</integer>
+
     <!-- Default for Settings.BATTERY_CHARGING_STATE_UPDATE_DELAY in millisecond.
         -1 means system internal default value is used. -->
     <integer name="def_battery_charging_state_update_delay_ms">-1</integer>
