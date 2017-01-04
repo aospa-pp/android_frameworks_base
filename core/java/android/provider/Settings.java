@@ -12912,6 +12912,26 @@ public final class Settings {
          * @hide
          */
         public static final String LOCKSCREEN_SECURE = "lockscreen_secure";
+
+        /**
+         * Network traffic indication
+         * 0 = Disabled
+         * 1 = Enabled
+         * @hide
+         */
+        public static final String NETWORK_TRAFFIC_ENABLED = "network_traffic_enabled";
+
+        /**
+         * Whether or not to hide the network traffic indicator when there is no activity
+         * @hide
+         */
+        public static final String NETWORK_TRAFFIC_AUTOHIDE = "network_traffic_autohide";
+
+        /**
+         * Measurement unit preference for network traffic
+         * @hide
+         */
+        public static final String NETWORK_TRAFFIC_UNIT_TYPE = "network_traffic_unit_type";
     }
 
     /**
