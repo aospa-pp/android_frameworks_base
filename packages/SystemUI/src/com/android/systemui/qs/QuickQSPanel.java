@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs;
 
+import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.util.AttributeSet;
@@ -26,6 +27,7 @@ import android.widget.LinearLayout;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.FontSizeUtils;
 import com.android.systemui.plugins.qs.QSTile;
+import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.res.R;
 
 /**
@@ -49,6 +51,53 @@ public class QuickQSPanel extends QSPanel {
     protected void setHorizontalContentContainerClipping() {
         mHorizontalContentContainer.setClipToPadding(false);
         mHorizontalContentContainer.setClipChildren(false);
+    }
+
+
+    @Override
+    public void setBrightnessView(@NonNull View view) {
+        if (mBrightnessView != null) {
+            removeView(mBrightnessView);
+        }
+        mBrightnessView = view;
+        mAutoBrightnessView = view.findViewById(R.id.brightness_icon);
+        setBrightnessViewMargin(mTop);
+        if (mBrightnessView != null) {
+            addView(mBrightnessView);
+        }
+    }
+
+    View getBrightnessView() {
+        return mBrightnessView;
+    }
+
+    private void setBrightnessViewMargin(boolean top) {
+        if (mBrightnessView != null) {
+            MarginLayoutParams lp = (MarginLayoutParams) mBrightnessView.getLayoutParams();
+            // For Brightness Slider to extend its boundary to draw focus background
+            int offset = getResources()
+                    .getDimensionPixelSize(R.dimen.rounded_slider_boundary_offset);
+            if (top) {
+                lp.topMargin = mContext.getResources()
+                        .getDimensionPixelSize(R.dimen.qqs_top_brightness_margin_top) - offset;
+                lp.bottomMargin = mContext.getResources()
+                        .getDimensionPixelSize(R.dimen.qqs_top_brightness_margin_bottom) - offset;
+            } else {
+                lp.topMargin = mContext.getResources()
+                        .getDimensionPixelSize(R.dimen.qqs_bottom_brightness_margin_top) - offset;
+                lp.bottomMargin = mContext.getResources()
+                        .getDimensionPixelSize(R.dimen.qqs_bottom_brightness_margin_bottom) - offset;
+            }
+            mBrightnessView.setLayoutParams(lp);
+        }
+    }
+
+    @Override
+    void initialize(QSLogger qsLogger, boolean usingMediaPlayer) {
+        super.initialize(qsLogger, usingMediaPlayer);
+        if (mHorizontalContentContainer != null) {
+            mHorizontalContentContainer.setClipChildren(false);
+        }
     }
 
     @Override
@@ -89,16 +138,15 @@ public class QuickQSPanel extends QSPanel {
         return !mExpanded;
     }
 
-    public void setMaxTiles(int maxTiles) {
-        mMaxTiles = maxTiles;
+    @Override
+    protected void updateBrightnessSliderVisibility(int settingsVal) {
+        if (mBrightnessView != null) {
+            mBrightnessView.setVisibility(settingsVal == 2 ? VISIBLE : GONE);
+        }
     }
 
-    @Override
-    public void onTuningChanged(String key, String newValue) {
-        if (QS_SHOW_BRIGHTNESS.equals(key)) {
-            // No Brightness or Tooltip for you!
-            super.onTuningChanged(key, "0");
-        }
+    public void setMaxTiles(int maxTiles) {
+        mMaxTiles = maxTiles;
     }
 
     public int getNumQuickTiles() {
