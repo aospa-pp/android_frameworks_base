@@ -169,11 +169,7 @@ public class CastTile extends QSTileImpl<BooleanState> {
             if (!mKeyguard.isShowing()) {
                 showDialog(view);
             } else {
-                mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
-                    // Dismissing the keyguard will collapse the shade, so we don't animate from the
-                    // view here as it would not look good.
-                    showDialog(null /* view */);
-                });
+                showDialog(null /* view */);
             }
         } else {
             mController.stopCasting(activeDevices.get(0));

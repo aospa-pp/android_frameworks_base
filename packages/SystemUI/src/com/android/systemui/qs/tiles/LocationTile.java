@@ -98,13 +98,6 @@ public class LocationTile extends QSTileImpl<BooleanState> {
 
     @Override
     protected void handleClick(@Nullable View view) {
-        if (mKeyguard.isMethodSecure() && mKeyguard.isShowing()) {
-            mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
-                mPanelInteractor.openPanels();
-                switchMode();
-            });
-            return;
-        }
         switchMode();
     }
 

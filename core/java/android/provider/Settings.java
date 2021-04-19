@@ -12281,6 +12281,12 @@ public final class Settings {
          * @hide
          */
         public static final String LOCKSCREEN_ENABLE_POWER_MENU = "lockscreen_enable_power_menu";
+
+        /**
+         * Whether user is allowed to interact with quick settings on lockscreen without authentication
+         * @hide
+         */
+        public static final String LOCK_SCREEN_ENABLE_QS_TILES = "lockscreen_enable_qs";
     }
 
     /**

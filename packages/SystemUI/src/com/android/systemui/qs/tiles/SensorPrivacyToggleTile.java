@@ -96,13 +96,6 @@ public abstract class SensorPrivacyToggleTile extends QSTileImpl<QSTile.BooleanS
     @Override
     protected void handleClick(@Nullable View view) {
         boolean blocked = mSensorPrivacyController.isSensorBlocked(getSensorId());
-        if (mSensorPrivacyController.requiresAuthentication()
-                && mKeyguard.isMethodSecure()
-                && mKeyguard.isShowing()) {
-            mActivityStarter.postQSRunnableDismissingKeyguard(() ->
-                    mSensorPrivacyController.setSensorBlocked(QS_TILE, getSensorId(), !blocked));
-            return;
-        }
         mSensorPrivacyController.setSensorBlocked(QS_TILE, getSensorId(), !blocked);
     }
 
