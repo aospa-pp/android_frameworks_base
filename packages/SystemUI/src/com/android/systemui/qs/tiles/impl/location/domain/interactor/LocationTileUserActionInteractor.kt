@@ -50,16 +50,8 @@ constructor(
             when (action) {
                 is QSTileUserAction.Click -> {
                     val wasEnabled: Boolean = input.data.isEnabled
-                    if (keyguardController.isMethodSecure() && keyguardController.isShowing()) {
-                        activityStarter.postQSRunnableDismissingKeyguard {
-                            CoroutineScope(applicationScope.coroutineContext).launch {
-                                locationController.setLocationEnabled(!wasEnabled)
-                            }
-                        }
-                    } else {
-                        withContext(coroutineContext) {
-                            locationController.setLocationEnabled(!wasEnabled)
-                        }
+                    withContext(coroutineContext) {
+                        locationController.setLocationEnabled(!wasEnabled)
                     }
                 }
                 is QSTileUserAction.LongClick -> {

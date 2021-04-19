@@ -93,14 +93,6 @@ public class LocationTile extends QSTileImpl<BooleanState> {
 
     @Override
     protected void handleClick(@Nullable Expandable expandable) {
-        if (mKeyguard.isMethodSecure() && mKeyguard.isShowing()) {
-            mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
-                final boolean wasEnabled = mState.value;
-                mPanelInteractor.openPanels();
-                mController.setLocationEnabled(!wasEnabled);
-            });
-            return;
-        }
         final boolean wasEnabled = mState.value;
         mController.setLocationEnabled(!wasEnabled);
     }
