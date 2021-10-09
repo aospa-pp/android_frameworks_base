@@ -178,6 +178,10 @@ private constructor(
         }
     }
 
+    fun getPhoneStatusBarView(): PhoneStatusBarView {
+        return mView
+    }
+
     inner class PhoneStatusBarViewTouchHandler : Gefingerpoken {
         override fun onInterceptTouchEvent(event: MotionEvent): Boolean {
             onTouch(event)
