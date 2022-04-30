@@ -78,10 +78,10 @@ public enum ScrimState {
             mNotifTint = mClipQsScrim ? Color.BLACK : Color.TRANSPARENT;
 
             mFrontAlpha = 0;
-            mBehindAlpha = mClipQsScrim ? 1 : mScrimBehindAlphaKeyguard;
+            mBehindAlpha = mClipQsScrim ? mCustomScrimAlpha : mScrimBehindAlphaKeyguard;
             mNotifAlpha = mClipQsScrim ? mScrimBehindAlphaKeyguard : 0;
             if (mClipQsScrim) {
-                updateScrimColor(mScrimBehind, 1f /* alpha */, Color.BLACK);
+                updateScrimColor(mScrimBehind, mCustomScrimAlpha, Color.BLACK);
             }
         }
     },
@@ -96,7 +96,7 @@ public enum ScrimState {
             mFrontAlpha = .66f;
 
             mBehindTint = Color.BLACK;
-            mBehindAlpha = 1f;
+            mBehindAlpha = mCustomScrimAlpha;
         }
     },
 
@@ -142,21 +142,25 @@ public enum ScrimState {
     BOUNCER_SCRIMMED {
         @Override
         public void prepare(ScrimState previousState) {
-            mBehindAlpha = 0;
-            mFrontAlpha = mDefaultScrimAlpha;
+            // Using previousState values makes SHADE_LOCKED -> BOUNCER_SCRIMMED smoother with no visual breakage
+            mBehindTint = previousState.mBehindTint;
+            mBehindAlpha = previousState.mBehindAlpha;
+            mFrontAlpha = 1f;
+            mNotifTint = previousState.mNotifTint;
+            mNotifAlpha = previousState.mNotifAlpha;
         }
     },
 
     SHADE_LOCKED {
         @Override
         public void prepare(ScrimState previousState) {
-            mBehindAlpha = mClipQsScrim ? 1 : mDefaultScrimAlpha;
-            mNotifAlpha = 1f;
+            mBehindAlpha = mClipQsScrim ? mCustomScrimAlpha : mDefaultScrimAlpha;
+            mNotifAlpha = mCustomScrimAlpha;
             mFrontAlpha = 0f;
             mBehindTint = mClipQsScrim ? Color.TRANSPARENT : Color.BLACK;
 
             if (mClipQsScrim) {
-                updateScrimColor(mScrimBehind, 1f /* alpha */, Color.BLACK);
+                updateScrimColor(mScrimBehind, mCustomScrimAlpha, Color.BLACK);
             }
         }
     },
@@ -241,7 +245,7 @@ public enum ScrimState {
         @Override
         public void prepare(ScrimState previousState) {
             // State that UI will sync to.
-            mBehindAlpha = mClipQsScrim ? 1 : 0;
+            mBehindAlpha = mClipQsScrim ? mCustomScrimAlpha : 0;
             mNotifAlpha = 0;
             mFrontAlpha = 0;
 
@@ -273,7 +277,7 @@ public enum ScrimState {
             }
 
             if (mClipQsScrim) {
-                updateScrimColor(mScrimBehind, 1f /* alpha */, Color.BLACK);
+                updateScrimColor(mScrimBehind, mCustomScrimAlpha, Color.BLACK);
             }
         }
     },
@@ -286,7 +290,7 @@ public enum ScrimState {
             mNotifTint = mClipQsScrim ? Color.BLACK : Color.TRANSPARENT;
 
             mFrontAlpha = 0;
-            mBehindAlpha = mClipQsScrim ? 1 : 0;
+            mBehindAlpha = mClipQsScrim ? mCustomScrimAlpha : 0;
             mNotifAlpha = 0;
 
             mBlankScreen = false;
@@ -309,6 +313,7 @@ public enum ScrimState {
     float mFrontAlpha;
     float mBehindAlpha;
     float mNotifAlpha;
+    float mCustomScrimAlpha;
 
     float mScrimBehindAlphaKeyguard;
     float mDefaultScrimAlpha;
@@ -444,5 +449,9 @@ public enum ScrimState {
 
     public void setClipQsScrim(boolean clipsQsScrim) {
         mClipQsScrim = clipsQsScrim;
+    }
+
+    public void setCustomScrimAlpha(float customScrimAlpha) {
+        mCustomScrimAlpha = customScrimAlpha;
     }
 }
