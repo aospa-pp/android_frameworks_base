@@ -5786,27 +5786,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     @Override
     public void registerScreenCaptureObserver(IBinder activityToken,
             IScreenCaptureObserver observer) {
-        mAmInternal.enforceCallingPermission(DETECT_SCREEN_CAPTURE,
-                "registerScreenCaptureObserver");
-        synchronized (mGlobalLock) {
-            ActivityRecord activityRecord = ActivityRecord.forTokenLocked(activityToken);
-            if (activityRecord != null) {
-                activityRecord.registerCaptureObserver(observer);
-            }
-        }
     }
 
     @Override
     public void unregisterScreenCaptureObserver(IBinder activityToken,
             IScreenCaptureObserver observer) {
-        mAmInternal.enforceCallingPermission(DETECT_SCREEN_CAPTURE,
-                "unregisterScreenCaptureObserver");
-        synchronized (mGlobalLock) {
-            ActivityRecord activityRecord = ActivityRecord.forTokenLocked(activityToken);
-            if (activityRecord != null) {
-                activityRecord.unregisterCaptureObserver(observer);
-            }
-        }
     }
 
     void registerCompatScaleProvider(@CompatScaleProvider.CompatScaleModeOrderId int id,
