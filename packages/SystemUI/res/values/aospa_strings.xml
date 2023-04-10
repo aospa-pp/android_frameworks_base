@@ -58,4 +58,7 @@
     <string name="megabytespersecond_short" translatable="false">MB/s</string>
     <string name="gigabytespersecond_short" translatable="false">GB/s</string>
 
+    <!-- Network traffic -->
+    <string name="network_traffic_title">Network traffic indicator</string>
+
 </resources>

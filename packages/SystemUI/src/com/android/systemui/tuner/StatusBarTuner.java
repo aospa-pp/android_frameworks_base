@@ -16,9 +16,13 @@
 package com.android.systemui.tuner;
 
 import android.os.Bundle;
+import android.os.UserHandle;
+import android.provider.Settings;
 
 import androidx.annotation.Nullable;
+import androidx.preference.Preference;
 import androidx.preference.PreferenceFragment;
+import androidx.preference.SwitchPreference;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -26,7 +30,11 @@ import com.android.systemui.res.R;
 
 public class StatusBarTuner extends PreferenceFragment {
 
+    private static final String NETWORK_TRAFFIC = "network_traffic";
+
     private MetricsLogger mMetricsLogger;
+
+    private SwitchPreference mNetMonitor;
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
@@ -37,6 +45,11 @@ public class StatusBarTuner extends PreferenceFragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         mMetricsLogger = new MetricsLogger();
+        mNetMonitor = (SwitchPreference) findPreference(NETWORK_TRAFFIC);
+
+        mNetMonitor.setChecked(Settings.Secure.getIntForUser(getActivity().getContentResolver(),
+            Settings.Secure.NETWORK_TRAFFIC_ENABLED, 0,
+            UserHandle.USER_CURRENT) == 1);
     }
 
     @Override
@@ -49,5 +62,17 @@ public class StatusBarTuner extends PreferenceFragment {
     public void onPause() {
         super.onPause();
         mMetricsLogger.visibility(MetricsEvent.TUNER, false);
+    }
+
+    @Override
+    public boolean onPreferenceTreeClick(Preference preference) {
+        if (preference == mNetMonitor) {
+            boolean checked = ((SwitchPreference)preference).isChecked();
+            Settings.Secure.putIntForUser(getActivity().getContentResolver(),
+                    Settings.Secure.NETWORK_TRAFFIC_ENABLED, checked ? 1 : 0,
+                    UserHandle.USER_CURRENT);
+            return true;
+        }
+        return super.onPreferenceTreeClick(preference);
     }
 }
