@@ -391,6 +391,10 @@ constructor(
                 AppOpsManager.OP_RECORD_AUDIO -> PrivacyType.TYPE_MICROPHONE
                 else -> return null
             }
+        // Hide incoming chip from sense caller package
+        if (appOpItem.packageName == "co.aospa.sense") {
+            return null
+        }
         val app = PrivacyApplication(appOpItem.packageName, appOpItem.uid)
         return PrivacyItem(type, app, appOpItem.timeStartedElapsed, appOpItem.isDisabled)
     }
