@@ -249,6 +249,8 @@ java_library {
         "service-sdksandbox.stubs.system_server",
     ],
 
+    jarjar_rules: "jarjar-rules.txt",
+
     vintf_fragments: [
         "manifest_services.xml",
     ],
