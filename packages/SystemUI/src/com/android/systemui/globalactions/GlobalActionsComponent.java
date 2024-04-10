@@ -125,4 +125,12 @@ public class GlobalActionsComponent implements CoreStartable, Callbacks, GlobalA
         } catch (RemoteException e) {
         }
     }
+
+    @Override
+    public void advancedReboot(String mode) {
+        try {
+            mBarService.advancedReboot(mode);
+        } catch (RemoteException e) {
+        }
+    }
 }
