@@ -32,6 +32,14 @@
     <java-symbol type="dimen" name="min_window_blur_radius" />
     <java-symbol type="dimen" name="max_window_blur_radius" />
 
+    <!-- Advanced reboot -->
+    <java-symbol type="string" name="reboot_to_recovery_title" />
+    <java-symbol type="string" name="reboot_to_recovery_message" />
+    <java-symbol type="string" name="reboot_to_bootloader_title" />
+    <java-symbol type="string" name="reboot_to_bootloader_message" />
+    <java-symbol type="string" name="reboot_title" />
+    <java-symbol type="string" name="reboot_message" />
+
     <!-- Package Manager -->
     <java-symbol type="array" name="config_deviceDisabledComponents" />
     <java-symbol type="array" name="config_globallyDisabledComponents" />
