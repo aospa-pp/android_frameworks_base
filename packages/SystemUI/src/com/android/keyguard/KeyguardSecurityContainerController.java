@@ -774,6 +774,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
         if (mCurrentSecurityMode != SecurityMode.None) {
             mView.startAppearAnimation(mCurrentSecurityMode);
             getCurrentSecurityController(controller -> controller.startAppearAnimation());
+            com.android.systemui.util.MediaArtUtils.getInstance(getContext()).hideMediaArt();
         }
     }
 
@@ -791,6 +792,7 @@ public class KeyguardSecurityContainerController extends ViewController<Keyguard
                                 onFinishRunnable);
                         if (!didRunAnimation && onFinishRunnable != null) {
                             onFinishRunnable.run();
+                            com.android.systemui.util.MediaArtUtils.getInstance(getContext()).updateMediaArtVisibility();
                         }
                     });
         }
