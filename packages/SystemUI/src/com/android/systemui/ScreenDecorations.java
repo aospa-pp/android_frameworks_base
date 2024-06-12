@@ -1245,6 +1245,11 @@ public class ScreenDecorations implements CoreStartable, Dumpable {
         if (mOverlays == null) {
             return;
         }
+        if (mPendingConfigChange) {
+            // Let RestartingPreDrawListener's onPreDraw call updateConfiguration
+            // -> updateOverlayProviderViews to redraw with display change synchronously.
+            return;
+        }
         ++mProviderRefreshToken;
         for (final OverlayWindow overlay: mOverlays) {
             if (overlay == null) {
