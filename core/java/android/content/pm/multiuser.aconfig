@@ -277,3 +277,13 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+    name: "fix_get_user_property_cache"
+    namespace: "multiuser"
+    description: "Cache is not optimised for getUserProperty for values below 0, eg. UserHandler.USER_NULL or UserHandle.USER_ALL"
+    bug: "350416200"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+}
