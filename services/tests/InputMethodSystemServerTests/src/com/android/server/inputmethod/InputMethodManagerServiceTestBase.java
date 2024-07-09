@@ -35,7 +35,9 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManagerInternal;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.IntentFilter;
 import android.content.pm.PackageManagerInternal;
 import android.content.res.Configuration;
 import android.hardware.input.IInputManager;
@@ -183,6 +185,9 @@ public class InputMethodManagerServiceTestBase {
         doNothing().when(mContext).enforceCallingPermission(anyString(), anyString());
         doNothing().when(mContext).sendBroadcastAsUser(any(), any());
         doReturn(null).when(mContext).registerReceiver(any(), any());
+        doReturn(null).when(mContext).registerReceiver(
+                any(BroadcastReceiver.class),
+                any(IntentFilter.class), anyString(), any(Handler.class));
         doReturn(null)
                 .when(mContext)
                 .registerReceiverAsUser(any(), any(), any(), anyString(), any(), anyInt());
