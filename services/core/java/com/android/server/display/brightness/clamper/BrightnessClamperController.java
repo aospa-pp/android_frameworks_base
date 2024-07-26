@@ -79,6 +79,9 @@ public class BrightnessClamperController {
     private final List<BrightnessClamper<? super DisplayDeviceData>> mClampers;
 
     private final List<BrightnessStateModifier> mModifiers;
+
+    private final List<UserSwitchListener> mUserSwitchListeners = new ArrayList<>();
+
     private final DeviceConfig.OnPropertiesChangedListener mOnPropertiesChangedListener;
     private float mBrightnessCap = PowerManager.BRIGHTNESS_MAX;
 
@@ -147,6 +150,11 @@ public class BrightnessClamperController {
                 context);
         mModifiers = mInjector.getModifiers(flags, context, handler, clamperChangeListener,
                 data.mDisplayDeviceConfig, mSensorManager);
+        mModifiers.forEach(m -> {
+            if (m instanceof UserSwitchListener l) {
+                mUserSwitchListeners.add(l);
+            }
+        });
         mOnPropertiesChangedListener =
                 properties -> mClampers.forEach(BrightnessClamper::onDeviceConfigChanged);
         start();
@@ -221,6 +229,13 @@ public class BrightnessClamperController {
             Slog.wtf(TAG, "BrightnessMaxReason not mapped for type=" + mClamperType);
             return BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE;
         }
+    }
+
+    /**
+     * Called when the user switches.
+     */
+    public void onUserSwitch() {
+        mUserSwitchListeners.forEach(listener -> listener.onSwitchUser());
     }
 
     /**
@@ -462,5 +477,12 @@ public class BrightnessClamperController {
                     com.android.internal.R.string.config_displayLightSensorType);
             mLightSensorName = "";
         }
+    }
+
+    /**
+     * A clamper/modifier should implement this interface if it reads user-specific settings
+     */
+    interface UserSwitchListener {
+        void onSwitchUser();
     }
 }
