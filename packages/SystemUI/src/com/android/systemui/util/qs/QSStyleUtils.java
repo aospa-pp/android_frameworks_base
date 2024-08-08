@@ -36,6 +36,6 @@ public class QSStyleUtils {
 
     public static boolean isRoundQSSetting(Context context) {
         return Settings.Secure.getIntForUser(context.getContentResolver(),
-                QS_STYLE_ROUND, 1, UserHandle.USER_CURRENT) == 1;
+                QS_STYLE_ROUND, 0, UserHandle.USER_CURRENT) == 1;
     }
 }
