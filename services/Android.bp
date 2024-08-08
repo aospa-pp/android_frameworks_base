@@ -236,6 +236,7 @@ java_library {
         "service-blobstore",
         "service-jobscheduler",
         "android.hidl.base-V1.0-java",
+        "lmofreeform-server",
     ],
 
     libs: [
