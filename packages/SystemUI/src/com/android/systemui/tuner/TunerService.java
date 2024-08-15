@@ -80,4 +80,12 @@ public abstract class TunerService {
             return defaultValue;
         }
     }
+
+    public static int parseInteger(String str, int defaultValue) {
+        try {
+            return Integer.parseInt(str);
+        } catch (NumberFormatException e) {
+            return defaultValue;
+        }
+    }
 }
