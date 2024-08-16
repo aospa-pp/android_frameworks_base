@@ -542,7 +542,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
                 UserHandle.USER_ALL);
 
         boolean isRoundQS = isRoundQSSetting(mContext);
-        setRoundQS(isRoundQS);
+        setRoundQS(mContext, isRoundQS);
         mThemeManager.enableOverlay(QS_STYLE_ROUND_OVERLAY, isRoundQS);
         mSecureSettings.registerContentObserverForUser(
                 Settings.Secure.getUriFor(Settings.Secure.QS_STYLE_ROUND),
@@ -552,7 +552,7 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
                     public void onChange(boolean selfChange, Collection<Uri> collection, int flags,
                             int userId) {
                         boolean isRoundQS = isRoundQSSetting(mContext);
-                        setRoundQS(isRoundQS);
+                        setRoundQS(mContext, isRoundQS);
                         mThemeManager.enableOverlay(QS_STYLE_ROUND_OVERLAY, isRoundQS);
 
                         reevaluateSystemTheme(true /* forceReload */);

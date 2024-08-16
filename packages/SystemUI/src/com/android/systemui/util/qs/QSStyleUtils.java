@@ -26,8 +26,20 @@ public class QSStyleUtils {
 
     private static boolean mIsRoundQS;
 
-    public static void setRoundQS(boolean enable) {
+    public static void setRoundQS(Context context, boolean enable) {
         mIsRoundQS = enable;
+        if (enable) {
+            Settings.Secure.putInt(context.getContentResolver(),
+                Settings.Secure.QS_SHOW_BRIGHTNESS_SLIDER, 2);
+            Settings.Secure.putInt(context.getContentResolver(),
+                    Settings.Secure.QS_BRIGHTNESS_SLIDER_POSITION, 1);
+        }
+        else {
+            Settings.Secure.putInt(context.getContentResolver(),
+                Settings.Secure.QS_SHOW_BRIGHTNESS_SLIDER, 1);
+            Settings.Secure.putInt(context.getContentResolver(),
+                    Settings.Secure.QS_BRIGHTNESS_SLIDER_POSITION, 0);
+        }
     }
 
     public static boolean isRoundQS() {
