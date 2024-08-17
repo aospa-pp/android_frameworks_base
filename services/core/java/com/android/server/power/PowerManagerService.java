@@ -68,6 +68,7 @@ import android.os.BatteryManagerInternal;
 import android.os.BatterySaverPolicyConfig;
 import android.os.Binder;
 import android.os.Build;
+import android.os.FileUtils;
 import android.os.Handler;
 import android.os.HandlerExecutor;
 import android.os.IBinder;
@@ -78,6 +79,8 @@ import android.os.Message;
 import android.os.ParcelDuration;
 import android.os.PowerManager;
 import android.os.PowerManager.GoToSleepReason;
+import android.os.PowerManager.LowPowerStandbyPortDescription;
+import android.os.PowerManager.LowPowerStandbyPortDescription;
 import android.os.PowerManager.ServiceType;
 import android.os.PowerManager.WakeReason;
 import android.os.PowerManagerInternal;
@@ -144,7 +147,9 @@ import com.android.server.power.feature.PowerManagerFlags;
 
 import dalvik.annotation.optimization.NeverCompile;
 
+import java.io.File;
 import java.io.FileDescriptor;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -861,6 +866,15 @@ public final class PowerManagerService extends SystemService
         }
     }
 
+    // Smart charging
+    private boolean mSmartChargingAvailable;
+    private boolean mSmartChargingEnabled;
+    private int mSmartChargingLevel;
+    private int mSmartChargingLevelDefaultConfig;
+    private static String mPowerInputSuspendSysfsNode;
+    private static String mPowerInputSuspendValue;
+    private static String mPowerInputResumeValue;
+
     /**
      * All times are in milliseconds. These constants are kept synchronized with the system
      * global Settings. Any access to this class or its fields should be done while
@@ -1444,6 +1458,12 @@ public final class PowerManagerService extends SystemService
 
         // Register for settings changes.
         resolver.registerContentObserver(Settings.Secure.getUriFor(
+                Settings.Secure.SMART_CHARGING),
+                false, mSettingsObserver, UserHandle.USER_ALL);
+        resolver.registerContentObserver(Settings.Secure.getUriFor(
+                Settings.Secure.SMART_CHARGING_LEVEL),
+                false, mSettingsObserver, UserHandle.USER_ALL);
+        resolver.registerContentObserver(Settings.Secure.getUriFor(
                 Settings.Secure.SCREENSAVER_ENABLED),
                 false, mSettingsObserver, UserHandle.USER_ALL);
         resolver.registerContentObserver(Settings.Secure.getUriFor(
@@ -1508,6 +1528,16 @@ public final class PowerManagerService extends SystemService
     void readConfigurationLocked() {
         final Resources resources = mContext.getResources();
 
+        mSmartChargingAvailable = resources.getBoolean(
+                com.android.internal.R.bool.config_smartChargingAvailable);
+        mSmartChargingLevelDefaultConfig = resources.getInteger(
+                com.android.internal.R.integer.config_smartChargingBatteryLevel);
+        mPowerInputSuspendSysfsNode = resources.getString(
+                com.android.internal.R.string.config_smartChargingSysfsNode);
+        mPowerInputSuspendValue = resources.getString(
+                com.android.internal.R.string.config_smartChargingSuspendValue);
+        mPowerInputResumeValue = resources.getString(
+                com.android.internal.R.string.config_smartChargingResumeValue);
         mDecoupleHalAutoSuspendModeFromDisplayConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_powerDecoupleAutoSuspendModeFromDisplay);
         mDecoupleHalInteractiveModeFromDisplayConfig = resources.getBoolean(
@@ -1585,6 +1615,11 @@ public final class PowerManagerService extends SystemService
                 Settings.Global.THEATER_MODE_ON, 0) == 1;
         mAlwaysOnEnabled =
                 mAmbientDisplayConfiguration.alwaysOnEnabledSetting(UserHandle.USER_CURRENT);
+        mSmartChargingEnabled = Settings.Secure.getIntForUser(resolver,
+                Settings.Secure.SMART_CHARGING, 0, UserHandle.USER_CURRENT) == 1;
+        mSmartChargingLevel = Settings.Secure.getIntForUser(resolver,
+                Settings.Secure.SMART_CHARGING_LEVEL,
+                mSmartChargingLevelDefaultConfig, UserHandle.USER_CURRENT);
 
         if (mSupportsDoubleTapWakeConfig) {
             boolean doubleTapWakeEnabled = Settings.Secure.getIntForUser(resolver,
@@ -1610,6 +1645,7 @@ public final class PowerManagerService extends SystemService
     void handleSettingsChangedLocked() {
         updateSettingsLocked();
         updatePowerStateLocked();
+        updateSmartChargingStatus();
     }
 
     @GuardedBy("mLock")
@@ -2676,6 +2712,36 @@ public final class PowerManagerService extends SystemService
             if (mBatterySaverSupported) {
                 mBatterySaverStateMachine.setBatteryStatus(mIsPowered, mBatteryLevel,
                         mBatteryLevelLow);
+            }
+
+            updateSmartChargingStatus();
+        }
+    }
+
+    private void updateSmartChargingStatus() {
+        if (!mSmartChargingAvailable) return;
+
+        String readValue = "";
+        try {
+            readValue = FileUtils.readTextFile(new File(mPowerInputSuspendSysfsNode), 100, "");
+        } catch (IOException e) {
+            Slog.e(TAG, "failed to write to " + mPowerInputSuspendSysfsNode);
+        }
+
+        boolean powerInputSuspended = readValue.contains(mPowerInputSuspendValue)? true: false;
+
+        if (powerInputSuspended && (mBatteryLevel <= mSmartChargingLevel-5 || !mSmartChargingEnabled)) {
+            try {
+                FileUtils.stringToFile(mPowerInputSuspendSysfsNode, mPowerInputResumeValue);
+            } catch (IOException e) {
+                Slog.e(TAG, "failed to write to " + mPowerInputSuspendSysfsNode);
+            }
+        }
+        else if (mSmartChargingEnabled && !powerInputSuspended && (mBatteryLevel >= mSmartChargingLevel)) {
+            try {
+                FileUtils.stringToFile(mPowerInputSuspendSysfsNode, mPowerInputSuspendValue);
+            } catch (IOException e) {
+                    Slog.e(TAG, "failed to write to " + mPowerInputSuspendSysfsNode);
             }
         }
     }
