@@ -2498,6 +2498,7 @@ public final class CachedAppOptimizer {
                         Slog.d(TAG_AM, "Skipping freeze because process is marked "
                                 + "should not be frozen");
                     }
+                    reportProcessFreezableChangedLocked(proc);
                     return;
                 }
 
