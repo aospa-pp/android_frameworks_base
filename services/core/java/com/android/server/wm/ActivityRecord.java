@@ -9321,25 +9321,6 @@ public final class ActivityRecord extends WindowToken implements WindowManagerSe
         if (mVisibleRequested) {
             // It may toggle the UI for user to restart the size compatibility mode activity.
             display.handleActivitySizeCompatModeIfNeeded(this);
-        } else if (getCompatDisplayInsets() != null && !visibleIgnoringKeyguard
-                && (app == null || !app.hasVisibleActivities())) {
-            // visibleIgnoringKeyguard is checked to avoid clearing mCompatDisplayInsets during
-            // displays change. Displays are turned off during the change so mVisibleRequested
-            // can be false.
-            // The override changes can only be obtained from display, because we don't have the
-            // difference of full configuration in each hierarchy.
-            final int displayChanges = display.getCurrentOverrideConfigurationChanges();
-            final int orientationChanges = CONFIG_WINDOW_CONFIGURATION
-                    | CONFIG_SCREEN_SIZE | CONFIG_ORIENTATION;
-            final boolean hasNonOrienSizeChanged = hasResizeChange(displayChanges)
-                    // Filter out the case of simple orientation change.
-                    && (displayChanges & orientationChanges) != orientationChanges;
-            // For background activity that uses size compatibility mode, if the size or density of
-            // the display is changed, then reset the override configuration and kill the activity's
-            // process if its process state is not important to user.
-            if (hasNonOrienSizeChanged || (displayChanges & ActivityInfo.CONFIG_DENSITY) != 0) {
-                restartProcessIfVisible();
-            }
         }
     }
 
