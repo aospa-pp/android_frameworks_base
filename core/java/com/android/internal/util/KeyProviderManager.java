@@ -49,7 +49,7 @@ public final class KeyProviderManager {
             Arrays.stream(keybox)
                     .map(entry -> entry.split(":", 2))
                     .filter(parts -> parts.length == 2)
-                    .forEach(parts -> keyboxData.put(parts[0], parts[1]));
+                    .forEach(parts -> keyboxData.put(parts[0], parts[1].equals("null")? "": parts[1]));
 
             if (!hasKeybox()) {
                 Log.w(TAG, "Incomplete keybox data loaded");
