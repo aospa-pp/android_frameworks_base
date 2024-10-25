@@ -43,9 +43,6 @@ public class KeyboxImitationHooks {
     private static final String TAG = "KeyboxImitationHooks";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
-    private static final Boolean sDisableKeyAttestationBlock = SystemProperties.getBoolean(
-            "persist.sys.pihooks.disable.gms_key_attestation_block", false);
-
     private static final ASN1ObjectIdentifier KEY_ATTESTATION_OID = new ASN1ObjectIdentifier(
             "1.3.6.1.4.1.11129.2.1.17");
 
@@ -170,11 +167,6 @@ public class KeyboxImitationHooks {
     }
 
     public static KeyEntryResponse onGetKeyEntry(KeyEntryResponse response) {
-        if (sDisableKeyAttestationBlock) {
-            dlog("Key attestation spoofing is disabled by user");
-            return response;
-        }
-
         // If no keybox is found, don't continue spoofing
         if (!KeyProviderManager.isKeyboxAvailable()) {
             dlog("Key attestation spoofing is disabled because no keybox is defined to spoof");
