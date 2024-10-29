@@ -250,69 +250,71 @@ public class BoostFramework {
                 try {
                     sPerfClass = Class.forName(PERFORMANCE_CLASS);
 
-                    Class[] argClasses = new Class[] {int.class, int[].class};
-                    sAcquireFunc = sPerfClass.getMethod("perfLockAcquire", argClasses);
-
-                    argClasses = new Class[] {int.class, String.class, int.class, int.class};
-                    sPerfHintFunc = sPerfClass.getMethod("perfHint", argClasses);
-
-                    argClasses = new Class[] {};
-                    sReleaseFunc = sPerfClass.getMethod("perfLockRelease", argClasses);
-
-                    argClasses = new Class[] {int.class};
-                    sReleaseHandlerFunc = sPerfClass.getDeclaredMethod("perfLockReleaseHandler", argClasses);
-
-                    argClasses = new Class[] {int.class, String.class};
-                    sFeedbackFunc = sPerfClass.getMethod("perfGetFeedback", argClasses);
-
-                    argClasses = new Class[] {int.class, String.class, int.class, int[].class};
-                    sFeedbackFuncExtn = sPerfClass.getMethod("perfGetFeedbackExtn", argClasses);
-
-                    argClasses = new Class[] {int.class, String.class, String.class};
-                    sIOPStart =   sPerfClass.getDeclaredMethod("perfIOPrefetchStart", argClasses);
-
-                    argClasses = new Class[] {};
-                    sIOPStop =  sPerfClass.getDeclaredMethod("perfIOPrefetchStop", argClasses);
-
-                    argClasses = new Class[] {String.class, String.class};
+                    Class[] argClasses = new Class[] {String.class, String.class};
                     sPerfGetPropFunc = sPerfClass.getMethod("perfGetProp", argClasses);
 
-                    argClasses = new Class[] {int.class, int.class, int.class, int.class, int[].class};
-                    sAcqAndReleaseFunc = sPerfClass.getMethod("perfLockAcqAndRelease", argClasses);
+                    if (SystemProperties.getBoolean("persist.qti.boost_framework.enabled", true)) {
+                        argClasses = new Class[] {int.class, int[].class};
+                        sAcquireFunc = sPerfClass.getMethod("perfLockAcquire", argClasses);
 
-                    argClasses = new Class[] {int.class, String.class, int.class, int[].class};
-                    sPerfEventFunc = sPerfClass.getMethod("perfEvent", argClasses);
+                        argClasses = new Class[] {int.class, String.class, int.class, int.class};
+                        sPerfHintFunc = sPerfClass.getMethod("perfHint", argClasses);
 
-                    argClasses = new Class[] {int.class};
-                    sPerfSyncRequest = sPerfClass.getMethod("perfSyncRequest", argClasses);
-
-                    argClasses = new Class[] {int.class, int.class, String.class, int.class,
-                                              int.class, int.class, int[].class};
-                    sperfHintAcqRelFunc = sPerfClass.getMethod("perfHintAcqRel", argClasses);
-
-                    argClasses = new Class[] {int.class, int.class, String.class, int.class,
-                                              int.class, int.class, int[].class};
-                    sperfHintRenewFunc = sPerfClass.getMethod("perfHintRenew", argClasses);
-
-                    try {
                         argClasses = new Class[] {};
-                        sPerfGetPerfHalVerFunc = sPerfClass.getMethod("perfGetHalVer", argClasses);
-
-                    } catch (Exception e) {
-                        Log.i(TAG, "BoostFramework() : Exception_1 = perfGetHalVer not supported");
-                        sPerfGetPerfHalVerFunc = null;
-                    }
-
-                    try {
-                        argClasses = new Class[] {int.class, int.class, String.class, int.class, String.class};
-                        sUXEngineEvents =  sPerfClass.getDeclaredMethod("perfUXEngine_events",
-                                                                          argClasses);
+                        sReleaseFunc = sPerfClass.getMethod("perfLockRelease", argClasses);
 
                         argClasses = new Class[] {int.class};
-                        sUXEngineTrigger =  sPerfClass.getDeclaredMethod("perfUXEngine_trigger",
-                                                                           argClasses);
-                    } catch (Exception e) {
-                        Log.i(TAG, "BoostFramework() : Exception_4 = PreferredApps not supported");
+                        sReleaseHandlerFunc = sPerfClass.getDeclaredMethod("perfLockReleaseHandler", argClasses);
+
+                        argClasses = new Class[] {int.class, String.class};
+                        sFeedbackFunc = sPerfClass.getMethod("perfGetFeedback", argClasses);
+
+                        argClasses = new Class[] {int.class, String.class, int.class, int[].class};
+                        sFeedbackFuncExtn = sPerfClass.getMethod("perfGetFeedbackExtn", argClasses);
+
+                        argClasses = new Class[] {int.class, String.class, String.class};
+                        sIOPStart =   sPerfClass.getDeclaredMethod("perfIOPrefetchStart", argClasses);
+
+                        argClasses = new Class[] {};
+                        sIOPStop =  sPerfClass.getDeclaredMethod("perfIOPrefetchStop", argClasses);
+
+                        argClasses = new Class[] {int.class, int.class, int.class, int.class, int[].class};
+                        sAcqAndReleaseFunc = sPerfClass.getMethod("perfLockAcqAndRelease", argClasses);
+
+                        argClasses = new Class[] {int.class, String.class, int.class, int[].class};
+                        sPerfEventFunc = sPerfClass.getMethod("perfEvent", argClasses);
+
+                        argClasses = new Class[] {int.class};
+                        sPerfSyncRequest = sPerfClass.getMethod("perfSyncRequest", argClasses);
+
+                        argClasses = new Class[] {int.class, int.class, String.class, int.class,
+                                                int.class, int.class, int[].class};
+                        sperfHintAcqRelFunc = sPerfClass.getMethod("perfHintAcqRel", argClasses);
+
+                        argClasses = new Class[] {int.class, int.class, String.class, int.class,
+                                                int.class, int.class, int[].class};
+                        sperfHintRenewFunc = sPerfClass.getMethod("perfHintRenew", argClasses);
+
+                        try {
+                            argClasses = new Class[] {};
+                            sPerfGetPerfHalVerFunc = sPerfClass.getMethod("perfGetHalVer", argClasses);
+
+                        } catch (Exception e) {
+                            Log.i(TAG, "BoostFramework() : Exception_1 = perfGetHalVer not supported");
+                            sPerfGetPerfHalVerFunc = null;
+                        }
+
+                        try {
+                            argClasses = new Class[] {int.class, int.class, String.class, int.class, String.class};
+                            sUXEngineEvents =  sPerfClass.getDeclaredMethod("perfUXEngine_events",
+                                                                            argClasses);
+
+                            argClasses = new Class[] {int.class};
+                            sUXEngineTrigger =  sPerfClass.getDeclaredMethod("perfUXEngine_trigger",
+                                                                            argClasses);
+                        } catch (Exception e) {
+                            Log.i(TAG, "BoostFramework() : Exception_4 = PreferredApps not supported");
+                        }
                     }
 
                     sIsLoaded = true;
@@ -663,6 +665,9 @@ public class BoostFramework {
         private static Method sGetAdjustedAnimationClock = null;
 
         private static void initQXPerfFuncs() {
+            if (!SystemProperties.getBoolean("persist.qti.boost_framework.enabled", true))
+                return;
+
             if (sQXIsLoaded) return;
 
             try {
