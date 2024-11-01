@@ -88,6 +88,8 @@
     <!-- Whether to use Richtap vibration -->
     <bool name="config_usesRichtapVibration">false</bool>
 
+    <bool name="config_blockGmsKeyAttestation">false</bool>
+
     <!-- Build properties from a GMS certified device against current platform SPL level -->
     <string-array name="config_certifiedBuildProperties" translatable="false">
       <!--
