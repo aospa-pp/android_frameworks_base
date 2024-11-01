@@ -19,6 +19,7 @@
 package com.android.internal.util;
 
 import android.app.ActivityTaskManager;
+import android.app.ActivityThread;
 import android.app.Application;
 import android.app.TaskStackListener;
 import android.content.ComponentName;
@@ -233,6 +234,29 @@ public class PropImitationHooks {
                 .anyMatch(elem -> elem.getClassName().contains("DroidGuard"));
     }
 
+    private static boolean isBlockingGmsKeyAttestation() {
+        Context context = null;
+        try {
+            context = ActivityThread.currentApplication().getApplicationContext();
+        } catch (Exception e) {
+            Log.e(TAG, "Error getting application context", e);
+            return true;
+        }
+
+        return context.getResources().getBoolean(R.bool.config_blockGmsKeyAttestation);
+    }
+
+    public static void onEngineGetCertificateChain() {
+        if (!isBlockingGmsKeyAttestation())
+            return;
+
+        // Check stack for SafetyNet or Play Integrity
+        if (isCallerSafetyNet() || sIsFinsky) {
+            dlog("Blocked key attestation sIsGms=" + sIsGms + " sIsFinsky=" + sIsFinsky);
+            throw new UnsupportedOperationException();
+        }
+    }
+    
     public static boolean hasSystemFeature(String name, boolean has) {
         if (sIsPhotos) {
             if (has && sPixelFeatures.stream().anyMatch(name::contains)) {
