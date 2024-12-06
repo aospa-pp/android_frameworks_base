@@ -597,6 +597,45 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         }
     }
 
+    private void shutdownAction() {
+        if (mKeyguardStateController.isMethodSecure() &&
+            mKeyguardStateController.isShowing() &&
+            Settings.Secure.getInt(mContext.getContentResolver(),
+            Settings.Secure.LOCKSCREEN_SECURE, 0) == 1) {
+            mActivityStarter.executeRunnableDismissingKeyguard(() -> {
+                mWindowManagerFuncs.shutdown();
+            }, null, false, false, false);
+        } else {
+            mWindowManagerFuncs.shutdown();
+        }
+    }
+
+    private void rebootAction(boolean safeMode) {
+        if (mKeyguardStateController.isMethodSecure() &&
+            mKeyguardStateController.isShowing() &&
+            Settings.Secure.getInt(mContext.getContentResolver(),
+            Settings.Secure.LOCKSCREEN_SECURE, 0) == 1) {
+            mActivityStarter.executeRunnableDismissingKeyguard(() -> {
+                mWindowManagerFuncs.reboot(safeMode);
+            }, null, false, false, false);
+        } else {
+            mWindowManagerFuncs.reboot(safeMode);
+        }
+    }
+
+    private void advancedRebootAction(String mode) {
+        if (mKeyguardStateController.isMethodSecure() &&
+            mKeyguardStateController.isShowing() &&
+            Settings.Secure.getInt(mContext.getContentResolver(),
+            Settings.Secure.LOCKSCREEN_SECURE, 0) == 1) {
+            mActivityStarter.executeRunnableDismissingKeyguard(() -> {
+                mWindowManagerFuncs.advancedReboot(mode);
+            }, null, false, false, false);
+        } else {
+            mWindowManagerFuncs.advancedReboot(mode);
+        }
+    }
+
     @VisibleForTesting
     protected void createActionItems() {
         // Simple toggle style if there's no vibrator, otherwise use a tri-state
@@ -623,7 +662,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             @Override
             public void onPress() {
                 mHandler.sendEmptyMessage(MESSAGE_DISMISS);
-                mWindowManagerFuncs.advancedReboot(PowerManager.REBOOT_RECOVERY);
+                advancedRebootAction(PowerManager.REBOOT_RECOVERY);
             }
         };
 
@@ -634,7 +673,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             @Override
             public void onPress() {
                 mHandler.sendEmptyMessage(MESSAGE_DISMISS);
-                mWindowManagerFuncs.advancedReboot(PowerManager.REBOOT_BOOTLOADER);
+                advancedRebootAction(PowerManager.REBOOT_BOOTLOADER);
             }
         };
 
@@ -899,7 +938,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             }
             mUiEventLogger.log(GlobalActionsEvent.GA_SHUTDOWN_LONG_PRESS);
             if (!mUserManager.hasUserRestriction(UserManager.DISALLOW_SAFE_BOOT)) {
-                mWindowManagerFuncs.reboot(true);
+                rebootAction(true);
                 return true;
             }
             return false;
@@ -924,7 +963,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             }
             mUiEventLogger.log(GlobalActionsEvent.GA_SHUTDOWN_PRESS);
             // shutdown by making sure radio and power are handled accordingly.
-            mWindowManagerFuncs.shutdown();
+            shutdownAction();
         }
     }
 
@@ -1040,7 +1079,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             }
             mUiEventLogger.log(GlobalActionsEvent.GA_REBOOT_LONG_PRESS);
             if (!mUserManager.hasUserRestriction(UserManager.DISALLOW_SAFE_BOOT)) {
-                mWindowManagerFuncs.reboot(true);
+                rebootAction(true);
                 return true;
             }
             return false;
@@ -1064,7 +1103,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                 return;
             }
             mUiEventLogger.log(GlobalActionsEvent.GA_REBOOT_PRESS);
-            mWindowManagerFuncs.reboot(false);
+            rebootAction(false);
         }
     }
 

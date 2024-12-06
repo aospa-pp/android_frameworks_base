@@ -12886,6 +12886,12 @@ public final class Settings {
          * @hide
          */
         public static final String SMART_CHARGING_LEVEL = "smart_charging_level";
+
+        /**
+         * Whether user is allowed to interact with power menu on lock screen without authentication
+         * @hide
+         */
+        public static final String LOCKSCREEN_SECURE = "lockscreen_secure";
     }
 
     /**
