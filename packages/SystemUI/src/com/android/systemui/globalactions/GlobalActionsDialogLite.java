@@ -124,6 +124,7 @@ import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
 import com.android.systemui.plugins.GlobalActionsPanelPlugin;
 import com.android.systemui.scrim.ScrimDrawable;
@@ -214,6 +215,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     private final TelecomManager mTelecomManager;
     private final MetricsLogger mMetricsLogger;
     private final UiEventLogger mUiEventLogger;
+    private final ActivityStarter mActivityStarter;
 
     // Used for RingerModeTracker
     private final LifecycleRegistry mLifecycle = new LifecycleRegistry(this);
@@ -371,7 +373,8 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             ShadeController shadeController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             DialogLaunchAnimator dialogLaunchAnimator,
-            BlurUtils blurUtils) {
+            BlurUtils blurUtils,
+            ActivityStarter activityStarter) {
         mContext = context;
         mWindowManagerFuncs = windowManagerFuncs;
         mAudioManager = audioManager;
@@ -407,6 +410,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
         mDialogLaunchAnimator = dialogLaunchAnimator;
         mBlurUtils = blurUtils;
+        mActivityStarter = activityStarter;
 
         // receive broadcasts
         IntentFilter filter = new IntentFilter();
@@ -585,6 +589,45 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         }
     }
 
+    private void shutdownAction() {
+        if (mKeyguardStateController.isMethodSecure() &&
+            mKeyguardStateController.isShowing() &&
+            Settings.Secure.getInt(mContext.getContentResolver(),
+            Settings.Secure.LOCKSCREEN_ENABLE_POWER_MENU, 1) == 0) {
+            mActivityStarter.executeRunnableDismissingKeyguard(() -> {
+                mWindowManagerFuncs.shutdown();
+            }, null, false, false, false);
+        } else {
+            mWindowManagerFuncs.shutdown();
+        }
+    }
+
+    private void rebootAction(boolean safeMode) {
+        if (mKeyguardStateController.isMethodSecure() &&
+            mKeyguardStateController.isShowing() &&
+            Settings.Secure.getInt(mContext.getContentResolver(),
+            Settings.Secure.LOCKSCREEN_ENABLE_POWER_MENU, 1) == 0) {
+            mActivityStarter.executeRunnableDismissingKeyguard(() -> {
+                mWindowManagerFuncs.reboot(safeMode);
+            }, null, false, false, false);
+        } else {
+            mWindowManagerFuncs.reboot(safeMode);
+        }
+    }
+
+    private void advancedRebootAction(String mode) {
+        if (mKeyguardStateController.isMethodSecure() &&
+            mKeyguardStateController.isShowing() &&
+            Settings.Secure.getInt(mContext.getContentResolver(),
+            Settings.Secure.LOCKSCREEN_ENABLE_POWER_MENU, 1) == 0) {
+            mActivityStarter.executeRunnableDismissingKeyguard(() -> {
+                mWindowManagerFuncs.advancedReboot(mode);
+            }, null, false, false, false);
+        } else {
+            mWindowManagerFuncs.advancedReboot(mode);
+        }
+    }
+
     @VisibleForTesting
     protected void createActionItems() {
         // Simple toggle style if there's no vibrator, otherwise use a tri-state
@@ -611,7 +654,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             @Override
             public void onPress() {
                 mHandler.sendEmptyMessage(MESSAGE_DISMISS);
-                mWindowManagerFuncs.advancedReboot(PowerManager.REBOOT_RECOVERY);
+                advancedRebootAction(PowerManager.REBOOT_RECOVERY);
             }
         };
 
@@ -622,7 +665,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             @Override
             public void onPress() {
                 mHandler.sendEmptyMessage(MESSAGE_DISMISS);
-                mWindowManagerFuncs.advancedReboot(PowerManager.REBOOT_BOOTLOADER);
+                advancedRebootAction(PowerManager.REBOOT_BOOTLOADER);
             }
         };
 
@@ -875,7 +918,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             }
             mUiEventLogger.log(GlobalActionsEvent.GA_SHUTDOWN_LONG_PRESS);
             if (!mUserManager.hasUserRestriction(UserManager.DISALLOW_SAFE_BOOT)) {
-                mWindowManagerFuncs.reboot(true);
+                rebootAction(true);
                 return true;
             }
             return false;
@@ -900,7 +943,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             }
             mUiEventLogger.log(GlobalActionsEvent.GA_SHUTDOWN_PRESS);
             // shutdown by making sure radio and power are handled accordingly.
-            mWindowManagerFuncs.shutdown();
+            shutdownAction();
         }
     }
 
@@ -1016,7 +1059,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             }
             mUiEventLogger.log(GlobalActionsEvent.GA_REBOOT_LONG_PRESS);
             if (!mUserManager.hasUserRestriction(UserManager.DISALLOW_SAFE_BOOT)) {
-                mWindowManagerFuncs.reboot(true);
+                rebootAction(true);
                 return true;
             }
             return false;
@@ -1040,7 +1083,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
                 return;
             }
             mUiEventLogger.log(GlobalActionsEvent.GA_REBOOT_PRESS);
-            mWindowManagerFuncs.reboot(false);
+            rebootAction(false);
         }
     }
 
