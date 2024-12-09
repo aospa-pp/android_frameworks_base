@@ -590,6 +590,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     }
 
     private void shutdownAction() {
+        mHandler.sendEmptyMessage(MESSAGE_DISMISS);
         if (mKeyguardStateController.isMethodSecure() &&
             mKeyguardStateController.isShowing() &&
             Settings.Secure.getInt(mContext.getContentResolver(),
@@ -603,6 +604,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     }
 
     private void rebootAction(boolean safeMode) {
+        mHandler.sendEmptyMessage(MESSAGE_DISMISS);
         if (mKeyguardStateController.isMethodSecure() &&
             mKeyguardStateController.isShowing() &&
             Settings.Secure.getInt(mContext.getContentResolver(),
@@ -616,6 +618,7 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
     }
 
     private void advancedRebootAction(String mode) {
+        mHandler.sendEmptyMessage(MESSAGE_DISMISS);
         if (mKeyguardStateController.isMethodSecure() &&
             mKeyguardStateController.isShowing() &&
             Settings.Secure.getInt(mContext.getContentResolver(),
@@ -653,7 +656,6 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         ) {
             @Override
             public void onPress() {
-                mHandler.sendEmptyMessage(MESSAGE_DISMISS);
                 advancedRebootAction(PowerManager.REBOOT_RECOVERY);
             }
         };
@@ -664,7 +666,6 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
         ) {
             @Override
             public void onPress() {
-                mHandler.sendEmptyMessage(MESSAGE_DISMISS);
                 advancedRebootAction(PowerManager.REBOOT_BOOTLOADER);
             }
         };
