@@ -10271,7 +10271,7 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
-        if (isBlocked && !(n.isMediaNotification() || isCallNotification(pkg, uid, n))) {
+        if (isBlocked && !n.isMediaNotification()) {
             if (DBG) {
                 Slog.e(TAG, "Suppressing notification from package " + r.getSbn().getPackageName()
                         + " by user request.");
@@ -10939,7 +10939,7 @@ public class NotificationManagerService extends SystemService {
                                 isCallNotificationAndCorrectStyle && isIncomingCall);
                     }
 
-                    if (!(notification.isMediaNotification() || isCallNotificationAndCorrectStyle)
+                    if (!notification.isMediaNotification()
                             && (appBanned || isRecordBlockedLocked(r))) {
                         mUsageStats.registerBlocked(r);
                         if (DBG) {
