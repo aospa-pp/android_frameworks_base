@@ -8096,7 +8096,7 @@ public class NotificationManagerService extends SystemService {
         synchronized (mNotificationLock) {
             isBlocked |= isRecordBlockedLocked(r);
         }
-        if (isBlocked && !(n.isMediaNotification() || isCallNotification(pkg, uid, n))) {
+        if (isBlocked && !n.isMediaNotification()) {
             if (DBG) {
                 Slog.e(TAG, "Suppressing notification from package " + r.getSbn().getPackageName()
                         + " by user request.");
@@ -8114,14 +8114,12 @@ public class NotificationManagerService extends SystemService {
 
         return true;
     }
-
     private boolean isCallNotification(String pkg, int uid, Notification n) {
         if (n.isStyle(Notification.CallStyle.class)) {
             return isCallNotification(pkg, uid);
         }
         return false;
     }
-
     private boolean isCallNotification(String pkg, int uid) {
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -8659,7 +8657,6 @@ public class NotificationManagerService extends SystemService {
          */
         private boolean postNotification() {
             boolean appBanned = !areNotificationsEnabledForPackageInt(pkg, uid);
-            boolean isCallNotification = isCallNotification(pkg, uid);
             boolean posted = false;
             synchronized (mNotificationLock) {
                 try {
@@ -8672,10 +8669,8 @@ public class NotificationManagerService extends SystemService {
 
                     final StatusBarNotification n = r.getSbn();
                     final Notification notification = n.getNotification();
-                    boolean isCallNotificationAndCorrectStyle = isCallNotification
-                            && notification.isStyle(Notification.CallStyle.class);
 
-                    if (!(notification.isMediaNotification() || isCallNotificationAndCorrectStyle)
+                    if (!notification.isMediaNotification()
                             && (appBanned || isRecordBlockedLocked(r))) {
                         mUsageStats.registerBlocked(r);
                         if (DBG) {
