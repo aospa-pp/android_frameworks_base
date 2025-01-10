@@ -6354,12 +6354,6 @@ public final class Settings {
         public static final String VOLBTN_MUSIC_CONTROLS = "volbtn_music_controls";
 
         /**
-         * Controls whether double tap to sleep is enabled (on lockscreen/homescreen).
-         * @hide
-         */
-        public static final String GESTURE_DOUBLE_TAP_SLEEP = "gesture_double_tap_sleep";
-
-        /**
          * Whether allowing pocket service to register sensors and dispatch informations.
          *   0 = disabled
          *   1 = enabled
