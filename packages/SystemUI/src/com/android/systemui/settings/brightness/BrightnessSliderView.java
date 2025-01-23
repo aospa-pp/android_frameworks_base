@@ -53,8 +53,6 @@ public class BrightnessSliderView extends LinearLayout {
     @Nullable
     private Drawable mProgressDrawable;
     @Nullable
-    private Drawable mProgressBgDrawable;
-    @Nullable
     private Drawable mToggleBgDrawable;
     private float mScale = 1f;
     private final Rect mSystemGestureExclusionRect = new Rect();
@@ -80,7 +78,6 @@ public class BrightnessSliderView extends LinearLayout {
         // Finds the progress drawable. Assumes brightness_progress_drawable.xml
         try {
             LayerDrawable progress = (LayerDrawable) mSlider.getProgressDrawable();
-            mProgressBgDrawable = progress.findDrawableByLayerId(android.R.id.background);
             DrawableWrapper progressSlider = (DrawableWrapper) progress
                     .findDrawableByLayerId(android.R.id.progress);
             LayerDrawable actualProgressSlider = (LayerDrawable) progressSlider.getDrawable();
@@ -276,11 +273,6 @@ public class BrightnessSliderView extends LinearLayout {
             int height = (int) (mProgressDrawable.getIntrinsicHeight() * mScale);
             int inset = (mProgressDrawable.getIntrinsicHeight() - height) / 2;
             mProgressDrawable.setBounds(r.left, inset, r.right, inset + height);
-            if (mProgressBgDrawable != null) {
-                final Rect rBackground = mProgressBgDrawable.getBounds();
-                mProgressBgDrawable.setBounds(rBackground.left, inset, rBackground.right,
-                        inset + height);
-            }
             if (mToggleBgDrawable != null) {
                 final Rect rToggle = mToggleBgDrawable.getBounds();
                 // The slider & toggle share the same height
