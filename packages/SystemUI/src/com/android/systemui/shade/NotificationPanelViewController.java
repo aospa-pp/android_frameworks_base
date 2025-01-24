@@ -881,7 +881,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
         mNotificationsDragEnabled = mResources.getBoolean(
                 R.bool.config_enableNotificationShadeDrag);
         mVibratorHelper = vibratorHelper;
-        mVibrateOnOpening = mResources.getBoolean(R.bool.config_vibrateOnIconAnimation);
+        mVibrateOnOpening = false;
         mStatusBarTouchableRegionManager = statusBarTouchableRegionManager;
         mSystemClock = systemClock;
         mKeyguardMediaController = keyguardMediaController;
