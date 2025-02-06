@@ -608,10 +608,11 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
                 addPercentView(inflatePercentView());
                 updatePercentText();
             }
+            Resources res = getContext().getResources();
             if (getBatteryStyle() == BATTERY_STYLE_TEXT) {
-                mBatteryPercentView.setPaddingRelative(0, 0, 0, 0);
+                mBatteryPercentView.setPaddingRelative(
+                        res.getDimensionPixelSize(R.dimen.battery_level_padding_start)/2, 0, 0, 0);
             } else {
-                Resources res = getContext().getResources();
                 mBatteryPercentView.setPaddingRelative(
                         res.getDimensionPixelSize(R.dimen.battery_level_padding_start), 0, 0, 0);
             }
@@ -744,6 +745,12 @@ public class BatteryMeterView extends LinearLayout implements DarkReceiver {
                 mBatteryIconView.setVisibility(View.GONE);
                 mBatteryIconView.setImageDrawable(null);
                 break;
+        }
+        Resources res = getContext().getResources();
+        if (getBatteryStyle() == BATTERY_STYLE_TEXT) {
+            setPaddingRelative(res.getDimensionPixelSize(R.dimen.battery_level_padding_start)/2, 0, 0, 0);
+        } else {
+            setPaddingRelative(res.getDimensionPixelSize(R.dimen.battery_level_padding_start), 0, 0, 0);
         }
     }
 
