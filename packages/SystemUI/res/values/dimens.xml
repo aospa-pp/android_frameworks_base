@@ -158,7 +158,7 @@
     <dimen name="status_bar_horizontal_padding">2.5sp</dimen>
 
     <!-- Height of the battery icon in the status bar. -->
-    <dimen name="status_bar_battery_icon_height">13.0sp</dimen>
+    <dimen name="status_bar_battery_icon_height">12.0sp</dimen>
 
     <!-- Width of the battery icon in the status bar. The battery drawable assumes a 12x20 canvas,
     so the width of the icon should be 13.0sp * (12.0 / 20.0) -->
@@ -196,13 +196,13 @@
     <dimen name="status_bar_wifi_inout_container_size">17sp</dimen>
     <!-- Size of the view displaying the wifi signal icon in the status bar. This value should
         match the core/status_bar_system_icon_size and change to sp unit -->
-    <dimen name="status_bar_wifi_signal_size">15sp</dimen>
+    <dimen name="status_bar_wifi_signal_size">14sp</dimen>
 
     <!-- Size of the view displaying the mobile inout icon in the status bar. -->
     <dimen name="status_bar_mobile_inout_container_size">17sp</dimen>
     <!-- Size of the view displaying the mobile signal icon in the status bar. This value should
         match the core/status_bar_system_icon_size and change to sp unit -->
-    <dimen name="status_bar_mobile_signal_size">15sp</dimen>
+    <dimen name="status_bar_mobile_signal_size">14sp</dimen>
     <dimen name="status_bar_mobile_signal_size_updated">14sp</dimen>
     <!-- Size of the view displaying the mobile signal icon in the status bar. This value should
         match the viewport height of mobile signal drawables such as ic_lte_mobiledata -->
