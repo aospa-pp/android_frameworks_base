@@ -1855,7 +1855,10 @@ public final class CachedAppOptimizer {
     void onProcessFrozen(ProcessRecord frozenProc) {
         if (useCompaction()) {
             synchronized (mProcLock) {
-                compactApp(frozenProc, CompactProfile.FULL, CompactSource.APP, false);
+                // only full-compact if process is cached
+                if (frozenProc.mState.getSetAdj() >= mCompactThrottleMinOomAdj) {
+                    compactApp(frozenProc, CompactProfile.FULL, CompactSource.APP, false);
+                }
             }
         }
         frozenProc.onProcessFrozen();
