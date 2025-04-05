@@ -691,7 +691,7 @@ public class ProcessFreezerManager {
         }
 
         try {
-            int rc = CachedAppOptimizer.freezeBinder(pid, false, 2 /* timeout_ms */);
+            int rc = Freezer.freezeBinderStatic(pid, false, 2 /* timeout_ms */);
             if (rc != 0) {
                 Slog.w(TAG, " *unable to unfreeze binder: " +  logInfo + " " + rc );
             } else {
@@ -789,7 +789,7 @@ public class ProcessFreezerManager {
         }
 
         try {
-            int rc = CachedAppOptimizer.freezeBinder(pid, true, 2 /* timeout_ms */);
+            int rc = Freezer.freezeBinderStatic(pid, true, 2 /* timeout_ms */);
             if (rc != 0){
                 Slog.w(TAG, " *unable to freeze binder for " + pid + ": " + rc);
             } else {

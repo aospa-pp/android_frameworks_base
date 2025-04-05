@@ -60,6 +60,10 @@ class Freezer {
         return nativeFreezeBinder(pid, freeze, timeoutMs);
     }
 
+    public static int freezeBinderStatic(int pid, boolean freeze, int timeoutMs) {
+        return nativeFreezeBinder(pid, freeze, timeoutMs);
+    }
+
     /**
      * Retrieves binder freeze info about a process.
      * @param pid the pid for which binder freeze info is to be retrieved.
