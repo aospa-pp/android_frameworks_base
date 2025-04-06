@@ -185,7 +185,7 @@ private class CarrierBasedSatelliteViewModelImpl(
     override val activityOutVisible: Flow<Boolean> = flowOf(false)
     override val activityContainerVisible: Flow<Boolean> = flowOf(false)
     override val volteId: Flow<Int> = flowOf(0)
-    override val showSignalStrengthIcon: Flow<Boolean> = flowOf(false)
+    override val showSignalStrengthIcon: Flow<Boolean> = flowOf(true)
     override val showHd: Flow<Boolean> = flowOf(false)
 }
 

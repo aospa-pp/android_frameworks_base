@@ -2001,7 +2001,7 @@ public class OomAdjuster {
                         Slog.d(TAG, "TOP-APP: pid:" + app.getPid() + ", processName: "
                                + app.processName + ", renderThreadTid: " + app.getRenderThreadTid());
                         if (mPerfHandle >= 0) {
-                            mPerfBoost.perfLockRelease();
+                            mPerfBoost.perfLockReleaseHandler(mPerfHandle);
                             mPerfHandle = -1;
                         }
                         mPerfHandle = mPerfBoost.perfHint(BoostFramework.VENDOR_HINT_BOOST_RENDERTHREAD,
