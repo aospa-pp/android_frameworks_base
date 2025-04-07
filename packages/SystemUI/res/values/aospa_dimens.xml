@@ -26,4 +26,7 @@
     <!-- Maximum vertical offset of navigation bar for burn-in protection -->
     <dimen name="navigation_bar_burn_in_offset_max_y">0dp</dimen>
 
+    <!-- Ringer QS tile -->
+    <dimen name="qs_ringer_tile_dot_radius">2dp</dimen>
+
 </resources>

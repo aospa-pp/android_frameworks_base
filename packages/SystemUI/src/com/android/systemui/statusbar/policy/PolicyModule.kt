@@ -29,6 +29,7 @@ import com.android.systemui.qs.tiles.DndTile
 import com.android.systemui.qs.tiles.FlashlightStrengthTile
 import com.android.systemui.qs.tiles.LocationTile
 import com.android.systemui.qs.tiles.MicrophoneToggleTile
+import com.android.systemui.qs.tiles.RingerModeTile
 import com.android.systemui.qs.tiles.UiModeNightTile
 import com.android.systemui.qs.tiles.VolumeControlTile
 import com.android.systemui.qs.tiles.WorkModeTile
@@ -432,4 +433,9 @@ interface PolicyModule {
     @IntoMap
     @StringKey(VolumeControlTile.TILE_SPEC)
     fun bindVolumeControlTile(volumeControlTile: VolumeControlTile): QSTileImpl<*>
+
+    @Binds
+    @IntoMap
+    @StringKey(RingerModeTile.TILE_SPEC)
+    fun bindRingerModeTile(RingerModeTile: RingerModeTile): QSTileImpl<*>
 }
