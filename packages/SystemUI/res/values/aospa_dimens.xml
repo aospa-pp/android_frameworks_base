@@ -29,4 +29,7 @@
     <!-- Ringer QS tile -->
     <dimen name="qs_ringer_tile_dot_radius">2dp</dimen>
 
+    <dimen name="status_bar_battery_icon_height_landscape_ios16">12.0dip</dimen>
+    <dimen name="status_bar_battery_icon_width_landscape_ios16">24.0dip</dimen>
+
 </resources>
