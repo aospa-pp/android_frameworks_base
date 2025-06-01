@@ -35,13 +35,13 @@ public class Util {
     }
 
     /**
-     * Convert milliseconds to a string in the format "HH:mm:ss".
+     * Convert seconds of the day to a string in the format "hh:mm:ss".
+     * in UTC.
      *
-     * @param ms time in milliseconds, should be less than
-     *           ${@link android.text.format.DateUtils#DAY_IN_MILLIS}
-     * @return formatted time string in the format "HH:mm:ss"
+     * @param ms milliseconds from epoch
+     * @return formatted time string in UTC time zone
      */
-    static public String msToHMSString(long ms) {
+    static public String msToUTCString(long ms) {
         final SimpleDateFormat dateFormat = new SimpleDateFormat("HH:mm:ss");
         Calendar calendar = Calendar.getInstance();
         dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
