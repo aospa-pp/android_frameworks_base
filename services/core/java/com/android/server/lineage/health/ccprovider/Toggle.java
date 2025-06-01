@@ -18,6 +18,7 @@ import android.content.IntentFilter;
 import android.os.BatteryManager;
 import android.os.BatteryStatsManager;
 import android.os.BatteryUsageStats;
+import android.os.RemoteException;
 import android.util.Log;
 
 import com.android.internal.R;
@@ -204,7 +205,7 @@ public class Toggle extends ChargingControlProvider {
                 mChargingControl.setChargingEnabled(enabled);
             }
             return true;
-        } catch (Exception e) {
+        } catch (RemoteException e) {
             Log.e(TAG, "Failed to set charging enabled", e);
             return false;
         }
@@ -228,7 +229,7 @@ public class Toggle extends ChargingControlProvider {
             mSavedTargetTime = 0;
             mEstimatedFullTime = 0;
             mStage = chgCtrlStage.STAGE_NONE;
-        } catch (Exception e) {
+        } catch (RemoteException e) {
             Log.e(TAG, "Failed to set charging enabled", e);
         }
     }
