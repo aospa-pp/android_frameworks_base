@@ -110,7 +110,7 @@ public class ChargingControlNotification {
         if (targetTime != null) {
             message = String.format(
                     mContext.getString(R.string.charging_control_notification_content_target),
-                    msToString(mContext, targetTime));
+                    msToString(targetTime));
         } else {
             message = String.format(
                     mContext.getString(R.string.charging_control_notification_content_limit),

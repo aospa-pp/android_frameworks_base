@@ -5,33 +5,33 @@
 
 package com.android.server.lineage.health;
 
-import android.content.Context;
-import android.text.format.DateFormat;
+import static java.time.format.FormatStyle.SHORT;
 
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.Calendar;
 import java.util.TimeZone;
 
 public class Util {
+    private static final DateTimeFormatter mFormatter = DateTimeFormatter.ofLocalizedTime(SHORT);
+
     /**
-     * Convert milliseconds to a string in the current locale's format.
+     * Convert milliseconds to a string in the format "hh:mm:ss a".
      *
      * @param ms milliseconds from epoch
      * @return formatted time string in current time zone
      */
-    static public String msToString(Context context, long ms) {
-        return DateFormat.getTimeFormat(context).format(msToLocalTime(ms).getTime());
-    }
-
-    static private Calendar msToLocalTime(long ms) {
+    static public String msToString(long ms) {
+        final SimpleDateFormat dateFormat = new SimpleDateFormat("hh:mm:ss a");
         Calendar calendar = Calendar.getInstance();
         calendar.setTimeInMillis(ms);
-        return calendar;
+        return dateFormat.format(calendar.getTime());
     }
 
     /**
