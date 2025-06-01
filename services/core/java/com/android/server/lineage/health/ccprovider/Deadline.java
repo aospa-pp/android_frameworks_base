@@ -11,6 +11,7 @@ import static com.android.internal.lineage.health.HealthInterface.MODE_MANUAL;
 import static com.android.server.lineage.health.Util.msToString;
 
 import android.content.Context;
+import android.os.RemoteException;
 import android.util.Log;
 
 import vendor.lineage.health.ChargingControlSupportedMode;
@@ -40,8 +41,13 @@ public class Deadline extends ChargingControlProvider {
         try {
             mChargingControl.setChargingDeadline(deadline);
             mSavedTargetTime = targetTime;
-        } catch (Exception e) {
+        } catch (RemoteException e) {
             Log.e(TAG, "Failed to set charging deadline", e);
+            return false;
+        } catch (IllegalStateException e) {
+            // This is possible when the device is just plugged in and the sysfs node is not ready
+            // to be written to
+            Log.e(TAG, "Failed to set charging deadline, will retry on next battery change");
             return false;
         }
 
@@ -64,7 +70,7 @@ public class Deadline extends ChargingControlProvider {
 
         try {
             mChargingControl.setChargingDeadline(-1);
-        } catch (Exception e) {
+        } catch (RemoteException e) {
             Log.e(TAG, "Failed to reset charging deadline", e);
         }
     }
