@@ -120,11 +120,12 @@ public class MediaProjectionPermissionActivity extends Activity
         final Intent launchingIntent = getIntent();
         mReviewGrantedConsentRequired = launchingIntent.getBooleanExtra(
                 EXTRA_USER_REVIEW_GRANTED_CONSENT, false);
-        mPackageName = getLaunchedFromPackage();
+
+        mPackageName = getCallingPackage();
 
         // This activity is launched directly by an app, or system server. System server provides
         // the package name through the intent if so.
-        if (getCallingPackage() == null)  {
+        if (mPackageName == null) {
             if (launchingIntent.hasExtra(EXTRA_PACKAGE_REUSING_GRANTED_CONSENT)) {
                 mPackageName = launchingIntent.getStringExtra(
                         EXTRA_PACKAGE_REUSING_GRANTED_CONSENT);
