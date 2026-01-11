@@ -72,12 +72,13 @@ class FlexClockViewGroupController(private val clockCtx: FlexClockContext) :
 
         val layerCfg =
             LayerConfig(
-                style = FontTextStyleImpl(lineHeight = 147.25f),
+                style = FontTextStyleImpl(lineHeight = 147.25f, fontFeatureSettings = "tnum"),
                 alignment = DigitalAlignment(HorizontalAlignment.CENTER, VerticalAlignment.CENTER),
                 aodStyle =
                     FontTextStyleImpl(
                         transitionInterpolator = Interpolators.EMPHASIZED,
                         transitionDuration = FlexClockViewGroup.AOD_TRANSITION_DURATION,
+                        fontFeatureSettings = "tnum",
                     ),
 
                 // Placeholder Timespec Values
