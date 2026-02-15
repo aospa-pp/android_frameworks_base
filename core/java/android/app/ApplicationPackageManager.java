@@ -850,13 +850,13 @@ public class ApplicationPackageManager extends PackageManager {
         // the SystemFeaturesCache class after initial rollout and validation.
         Boolean maybeHasSystemFeature = RoSystemFeatures.maybeHasFeature(name, version);
         if (maybeHasSystemFeature != null) {
-            return maybeHasSystemFeature;
+            return PropImitationHooks.hasSystemFeature(name, maybeHasSystemFeature);
         }
         if (mUseSystemFeaturesCache) {
             maybeHasSystemFeature =
                     SystemFeaturesCache.getInstance().maybeHasFeature(name, version);
             if (maybeHasSystemFeature != null) {
-                return maybeHasSystemFeature;
+                return PropImitationHooks.hasSystemFeature(name, maybeHasSystemFeature);
             }
         }
         return PropImitationHooks.hasSystemFeature(name,
