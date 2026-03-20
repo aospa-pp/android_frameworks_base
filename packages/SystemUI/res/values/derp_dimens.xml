@@ -1,5 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+     SPDX-FileCopyrightText: DerpFest AOSP
+     SPDX-License-Identifier: Apache-2.0
+-->
 <resources>
+
+    <!-- StatusBar burn-in protection -->
+    <dimen name="horizontal_max_shift">4dp</dimen>
+    <dimen name="vertical_max_shift">4dp</dimen>
+
+    <!-- Network Speed -->
+    <dimen name="network_speed_margin_bottom">7dp</dimen>
+    <dimen name="network_speed_text_size">8dp</dimen>
+    <dimen name="network_speed_unit_margin_top">9dp</dimen>
+    <dimen name="network_speed_unit_text_size">6dp</dimen>
+    <dimen name="network_speed_view_padding_end">2dp</dimen>
+    <dimen name="network_speed_view_width">22dp</dimen>
+
     <!-- Smartspace -->
     <dimen name="ambient_text_shadow_radius">1.5dp</dimen>
     <dimen name="date_weather_view_height">24.0dp</dimen>
@@ -36,4 +53,5 @@
     <dimen name="weather_dream_complication_text_descent_extra_padding">1.0dp</dimen>
     <dimen name="weather_dream_overlay_complication_line_height">52.0dp</dimen>
     <dimen name="weather_dream_overlay_complication_text_size">45.0dp</dimen>
+
 </resources>
