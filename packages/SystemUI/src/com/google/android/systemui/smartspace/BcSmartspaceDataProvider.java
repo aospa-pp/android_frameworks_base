@@ -6,12 +6,10 @@ import android.os.Debug;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
+
+import com.android.systemui.plugins.BcSmartspaceDataPlugin;
 import com.android.systemui.res.R;
 
-import com.android.systemui.plugins.BcSmartspaceConfigPlugin;
-import com.android.systemui.plugins.BcSmartspaceDataPlugin;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -20,15 +18,15 @@ import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.stream.Collectors;
 
 public final class BcSmartspaceDataProvider implements BcSmartspaceDataPlugin {
-    public static final boolean DEBUG = Log.isLoggable("BcSmartspaceDataPlugin", 3);
+    public static final boolean DEBUG = Log.isLoggable(BcSmartspaceDataPlugin.TAG, 3);
 
     public final View.OnAttachStateChangeListener mStateChangeListener;
-    public final Set<BcSmartspaceDataPlugin.SmartspaceTargetListener> mSmartspaceTargetListeners = new CopyOnWriteArraySet<>();
-    public List<SmartspaceTarget> mSmartspaceTargets = new ArrayList<>();
+    public final Set<BcSmartspaceDataPlugin.SmartspaceTargetListener> mSmartspaceTargetListeners =
+            new CopyOnWriteArraySet<>();
+    public List<SmartspaceTarget> mSmartspaceTargets = Collections.emptyList();
     public final Set<View> mViews = new HashSet<>();
     public final Set<View.OnAttachStateChangeListener> mAttachListeners = new HashSet<>();
     public final EventNotifierProxy mEventNotifier = new EventNotifierProxy();
-    public BcSmartspaceConfigPlugin mConfigProvider = new DefaultBcSmartspaceConfigProvider();
 
     public final class StateChangeListener implements View.OnAttachStateChangeListener {
         @Override
@@ -36,9 +34,6 @@ public final class BcSmartspaceDataProvider implements BcSmartspaceDataPlugin {
             mViews.add(view);
             for (View.OnAttachStateChangeListener listener : mAttachListeners) {
                 listener.onViewAttachedToWindow(view);
-            }
-            if (view instanceof BcSmartspaceView) {
-                ((BcSmartspaceView) view).registerDataProvider(BcSmartspaceDataProvider.this);
             }
         }
 
@@ -70,40 +65,29 @@ public final class BcSmartspaceDataProvider implements BcSmartspaceDataPlugin {
 
     @Override
     public BcSmartspaceDataPlugin.SmartspaceView getView(Context context) {
-        int layoutId = mConfigProvider.isViewPager2Enabled()
-                ? R.layout.smartspace_enhanced2
-                : R.layout.smartspace_enhanced;
-
-        View view = LayoutInflater.from(context).inflate(layoutId, (ViewGroup) null, false);
+        View view =
+                LayoutInflater.from(context).inflate(R.layout.smartspace_enhanced2, null, false);
         view.addOnAttachStateChangeListener(mStateChangeListener);
-
-        // Explicitly register data provider.
-        // Note: The StateChangeListener also attempts this on attach, but doing it here ensures immediate availability.
-        if (view instanceof BcSmartspaceView) {
-            ((BcSmartspaceView) view).registerDataProvider(this);
-        }
-
         return (BcSmartspaceDataPlugin.SmartspaceView) view;
     }
 
     @Override
     public void onTargetsAvailable(List<SmartspaceTarget> list) {
         if (DEBUG) {
-            Log.d("BcSmartspaceDataPlugin", this + " onTargetsAvailable called. Callers = " + Debug.getCallers(3));
-            Log.d("BcSmartspaceDataPlugin", "    targets.size() = " + list.size());
+            Log.d(
+                    BcSmartspaceDataPlugin.TAG,
+                    this + " onTargetsAvailable called. Callers = " + Debug.getCallers(3));
+            Log.d(BcSmartspaceDataPlugin.TAG, "    targets.size() = " + list.size());
+            Log.d(BcSmartspaceDataPlugin.TAG, "    targets = " + list.toString());
         }
 
-        // Filter out feature type 15 (MEDIA?) as seen in reference implementation
-        mSmartspaceTargets = list.stream()
-                .filter(target -> target.getFeatureType() != 15)
-                .collect(Collectors.toList());
+        mSmartspaceTargets =
+                list.stream()
+                        .filter(target -> target.getFeatureType() != 15)
+                        .collect(Collectors.toList());
 
-        mSmartspaceTargetListeners.forEach(listener -> listener.onSmartspaceTargetsUpdated(mSmartspaceTargets));
-    }
-
-    @Override
-    public void registerConfigProvider(BcSmartspaceConfigPlugin configPlugin) {
-        mConfigProvider = configPlugin;
+        mSmartspaceTargetListeners.forEach(
+                listener -> listener.onSmartspaceTargetsUpdated(mSmartspaceTargets));
     }
 
     @Override

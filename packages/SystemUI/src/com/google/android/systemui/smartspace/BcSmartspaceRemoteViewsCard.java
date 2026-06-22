@@ -8,11 +8,9 @@ import android.view.View;
 
 import com.android.systemui.plugins.BcSmartspaceDataPlugin;
 
-import com.google.android.systemui.smartspace.BcSmartSpaceUtil;
 import com.google.android.systemui.smartspace.logging.BcSmartspaceCardLoggingInfo;
 
 public final class BcSmartspaceRemoteViewsCard extends AppWidgetHostView implements SmartspaceCard {
-    public BcSmartspaceDataPlugin.SmartspaceEventNotifier mEventNotifier;
     public BcSmartspaceCardLoggingInfo mLoggingInfo;
     public SmartspaceTarget mTarget;
     public String mUiSurface;
@@ -26,11 +24,14 @@ public final class BcSmartspaceRemoteViewsCard extends AppWidgetHostView impleme
     }
 
     @Override
-    public final void bindData(SmartspaceTarget target, BcSmartspaceDataPlugin.SmartspaceEventNotifier eventNotifier, BcSmartspaceCardLoggingInfo loggingInfo, boolean usePageIndicatorUi) {
+    public final void bindData(
+            SmartspaceTarget target,
+            BcSmartspaceDataPlugin.SmartspaceEventNotifier eventNotifier,
+            BcSmartspaceCardLoggingInfo loggingInfo,
+            boolean usePageIndicatorUi) {
         updateAppWidget(null);
         mTarget = target;
         mLoggingInfo = loggingInfo;
-        mEventNotifier = eventNotifier;
         updateAppWidget(target.getRemoteViews());
         SmartspaceAction headerAction = target.getHeaderAction();
         if (headerAction == null) {
@@ -39,11 +40,18 @@ public final class BcSmartspaceRemoteViewsCard extends AppWidgetHostView impleme
             return;
         }
 
-        BcSmartSpaceUtil.setOnClickListener(this, target, headerAction, mEventNotifier, "BcSmartspaceRemoteViewsCard", loggingInfo, 0);
+        BcSmartSpaceUtil.setOnClickListener(
+                this,
+                target,
+                headerAction,
+                eventNotifier,
+                "BcSmartspaceRemoteViewsCard",
+                loggingInfo,
+                0);
         if (BcSmartspaceDataPlugin.UI_SURFACE_LOCK_SCREEN_AOD.equals(mUiSurface)) {
             super.setInteractionHandler(
                     new BcSmartSpaceUtil.InteractionHandler(
-                            loggingInfo, mEventNotifier, target, headerAction));
+                            loggingInfo, eventNotifier, target, headerAction));
         }
     }
 
@@ -67,14 +75,11 @@ public final class BcSmartspaceRemoteViewsCard extends AppWidgetHostView impleme
     }
 
     @Override
-    public final void setDozeAmount(float dozeAmount) {
-    }
+    public final void setDozeAmount(float dozeAmount) {}
 
     @Override
-    public final void setPrimaryTextColor(int color) {
-    }
+    public final void setPrimaryTextColor(int color) {}
 
     @Override
-    public final void setScreenOn(boolean screenOn) {
-    }
+    public final void setScreenOn(boolean screenOn) {}
 }

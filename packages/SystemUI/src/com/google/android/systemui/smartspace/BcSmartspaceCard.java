@@ -16,17 +16,21 @@ import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.view.animation.PathInterpolator;
 import android.widget.TextView;
+
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
+
 import com.android.app.animation.Interpolators;
 import com.android.launcher3.icons.GraphicsUtils;
 import com.android.systemui.plugins.BcSmartspaceDataPlugin;
 import com.android.systemui.plugins.FalsingManager;
+import com.android.systemui.res.R;
+
 import com.google.android.systemui.smartspace.logging.BcSmartspaceCardLoggingInfo;
 import com.google.android.systemui.smartspace.logging.BcSmartspaceCardMetadataLoggingInfo;
 import com.google.android.systemui.smartspace.logging.BcSmartspaceSubcardLoggingInfo;
 import com.google.android.systemui.smartspace.utils.ContentDescriptionUtil;
-import com.android.systemui.res.R;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -59,18 +63,23 @@ public class BcSmartspaceCard extends ConstraintLayout implements SmartspaceCard
     }
 
     /* JADX DEBUG: Don't trust debug lines info. Lines numbers was adjusted: min line is 1 */
-    public static int getClickedIndex(BcSmartspaceCardLoggingInfo bcSmartspaceCardLoggingInfo, int i) {
+    public static int getClickedIndex(
+            BcSmartspaceCardLoggingInfo bcSmartspaceCardLoggingInfo, int i) {
         List list;
-        BcSmartspaceSubcardLoggingInfo bcSmartspaceSubcardLoggingInfo = bcSmartspaceCardLoggingInfo.mSubcardInfo;
-        if (bcSmartspaceSubcardLoggingInfo != null && (list = bcSmartspaceSubcardLoggingInfo.mSubcards) != null) {
+        BcSmartspaceSubcardLoggingInfo bcSmartspaceSubcardLoggingInfo =
+                bcSmartspaceCardLoggingInfo.mSubcardInfo;
+        if (bcSmartspaceSubcardLoggingInfo != null
+                && (list = bcSmartspaceSubcardLoggingInfo.mSubcards) != null) {
             int i2 = 0;
             while (true) {
                 ArrayList arrayList = (ArrayList) list;
                 if (i2 >= arrayList.size()) {
                     break;
                 }
-                BcSmartspaceCardMetadataLoggingInfo bcSmartspaceCardMetadataLoggingInfo = (BcSmartspaceCardMetadataLoggingInfo) arrayList.get(i2);
-                if (bcSmartspaceCardMetadataLoggingInfo != null && bcSmartspaceCardMetadataLoggingInfo.mCardTypeId == i) {
+                BcSmartspaceCardMetadataLoggingInfo bcSmartspaceCardMetadataLoggingInfo =
+                        (BcSmartspaceCardMetadataLoggingInfo) arrayList.get(i2);
+                if (bcSmartspaceCardMetadataLoggingInfo != null
+                        && bcSmartspaceCardMetadataLoggingInfo.mCardTypeId == i) {
                     return i2 + 1;
                 }
                 i2++;
@@ -81,7 +90,11 @@ public class BcSmartspaceCard extends ConstraintLayout implements SmartspaceCard
 
     /* JADX DEBUG: Don't trust debug lines info. Lines numbers was adjusted: min line is 1 */
     @Override // com.google.android.systemui.smartspace.SmartspaceCard
-    public final void bindData(SmartspaceTarget smartspaceTarget, BcSmartspaceDataPlugin.SmartspaceEventNotifier smartspaceEventNotifier, BcSmartspaceCardLoggingInfo bcSmartspaceCardLoggingInfo, boolean z) {
+    public final void bindData(
+            SmartspaceTarget smartspaceTarget,
+            BcSmartspaceDataPlugin.SmartspaceEventNotifier smartspaceEventNotifier,
+            BcSmartspaceCardLoggingInfo bcSmartspaceCardLoggingInfo,
+            boolean z) {
         SmartspaceAction smartspaceAction;
         BcSmartspaceCardLoggingInfo bcSmartspaceCardLoggingInfo2 = bcSmartspaceCardLoggingInfo;
         Drawable drawable = null;
@@ -128,7 +141,11 @@ public class BcSmartspaceCard extends ConstraintLayout implements SmartspaceCard
             BcSmartspaceCardSecondary bcSmartspaceCardSecondary = this.mSecondaryCard;
             if (bcSmartspaceCardSecondary != null) {
                 bcSmartspaceCardSecondary.reset(smartspaceTarget.getSmartspaceTargetId());
-                this.mValidSecondaryCard = this.mSecondaryCard.setSmartspaceActions(smartspaceTarget, this.mEventNotifier, bcSmartspaceCardLoggingInfo2);
+                this.mValidSecondaryCard =
+                        this.mSecondaryCard.setSmartspaceActions(
+                                smartspaceTarget,
+                                this.mEventNotifier,
+                                bcSmartspaceCardLoggingInfo2);
             }
             ViewGroup viewGroup2 = this.mSecondaryCardGroup;
             if (viewGroup2 != null) {
@@ -142,7 +159,12 @@ public class BcSmartspaceCard extends ConstraintLayout implements SmartspaceCard
             Icon icon = headerAction.getIcon();
             Context context = getContext();
             FalsingManager falsingManager = BcSmartSpaceUtil.sFalsingManager;
-            Drawable iconDrawableWithCustomSize = BcSmartSpaceUtil.getIconDrawableWithCustomSize(icon, context, context.getResources().getDimensionPixelSize(R.dimen.enhanced_smartspace_icon_size));
+            Drawable iconDrawableWithCustomSize =
+                    BcSmartSpaceUtil.getIconDrawableWithCustomSize(
+                            icon,
+                            context,
+                            context.getResources()
+                                    .getDimensionPixelSize(R.dimen.enhanced_smartspace_icon_size));
             boolean z2 = iconDrawableWithCustomSize != null;
             this.mIconDrawable.setIcon(iconDrawableWithCustomSize);
             CharSequence title = headerAction.getTitle();
@@ -160,49 +182,99 @@ public class BcSmartspaceCard extends ConstraintLayout implements SmartspaceCard
             setSubtitle(subtitle, headerAction.getContentDescription(), z2);
         }
         if (baseAction != null) {
-            int i3 = (baseAction.getExtras() == null || baseAction.getExtras().isEmpty()) ? -1 : baseAction.getExtras().getInt("subcardType", -1);
+            int i3 =
+                    (baseAction.getExtras() == null || baseAction.getExtras().isEmpty())
+                            ? -1
+                            : baseAction.getExtras().getInt("subcardType", -1);
             if (baseAction.getIcon() != null) {
                 Icon icon2 = baseAction.getIcon();
                 Context context2 = getContext();
                 FalsingManager falsingManager2 = BcSmartSpaceUtil.sFalsingManager;
-                drawable = BcSmartSpaceUtil.getIconDrawableWithCustomSize(icon2, context2, context2.getResources().getDimensionPixelSize(R.dimen.enhanced_smartspace_icon_size));
+                drawable =
+                        BcSmartSpaceUtil.getIconDrawableWithCustomSize(
+                                icon2,
+                                context2,
+                                context2.getResources()
+                                        .getDimensionPixelSize(
+                                                R.dimen.enhanced_smartspace_icon_size));
             }
             this.mBaseActionIconDrawable.setIcon(drawable);
-            setBaseActionIconSubtitle(baseAction.getSubtitle(), baseAction.getContentDescription(), this.mBaseActionIconDrawable);
+            setBaseActionIconSubtitle(
+                    baseAction.getSubtitle(),
+                    baseAction.getContentDescription(),
+                    this.mBaseActionIconDrawable);
             if (i3 != -1) {
                 i2 = getClickedIndex(bcSmartspaceCardLoggingInfo2, i3);
             } else {
-                Log.d("BcSmartspaceCard", "Subcard expected but missing type. loggingInfo=" + bcSmartspaceCardLoggingInfo2.toString() + ", baseAction=" + baseAction.toString());
+                Log.d(
+                        "BcSmartspaceCard",
+                        "Subcard expected but missing type. loggingInfo="
+                                + bcSmartspaceCardLoggingInfo2.toString()
+                                + ", baseAction="
+                                + baseAction.toString());
             }
-            BcSmartSpaceUtil.setOnClickListener(this.mBaseActionIconSubtitleView, smartspaceTarget, baseAction, this.mEventNotifier, "BcSmartspaceCard", bcSmartspaceCardLoggingInfo, i2);
+            BcSmartSpaceUtil.setOnClickListener(
+                    this.mBaseActionIconSubtitleView,
+                    smartspaceTarget,
+                    baseAction,
+                    this.mEventNotifier,
+                    "BcSmartspaceCard",
+                    bcSmartspaceCardLoggingInfo,
+                    i2);
             smartspaceAction = baseAction;
             bcSmartspaceCardLoggingInfo2 = bcSmartspaceCardLoggingInfo;
         } else {
             smartspaceAction = baseAction;
         }
         updateIconTint();
-        if (headerAction == null || (headerAction.getIntent() == null && headerAction.getPendingIntent() == null)) {
+        if (headerAction == null
+                || (headerAction.getIntent() == null && headerAction.getPendingIntent() == null)) {
             SmartspaceAction smartspaceAction2 = smartspaceAction;
-            if (smartspaceAction2 == null || (smartspaceAction2.getIntent() == null && smartspaceAction2.getPendingIntent() == null)) {
+            if (smartspaceAction2 == null
+                    || (smartspaceAction2.getIntent() == null
+                            && smartspaceAction2.getPendingIntent() == null)) {
                 if (headerAction != null) {
-                    BcSmartSpaceUtil.setOnClickListener(this, smartspaceTarget, headerAction, this.mEventNotifier, "BcSmartspaceCard", bcSmartspaceCardLoggingInfo, 0);
+                    BcSmartSpaceUtil.setOnClickListener(
+                            this,
+                            smartspaceTarget,
+                            headerAction,
+                            this.mEventNotifier,
+                            "BcSmartspaceCard",
+                            bcSmartspaceCardLoggingInfo,
+                            0);
                 }
             } else if (smartspaceAction2 != null) {
-                BcSmartSpaceUtil.setOnClickListener(this, smartspaceTarget, smartspaceAction2, this.mEventNotifier, "BcSmartspaceCard", bcSmartspaceCardLoggingInfo, 0);
+                BcSmartSpaceUtil.setOnClickListener(
+                        this,
+                        smartspaceTarget,
+                        smartspaceAction2,
+                        this.mEventNotifier,
+                        "BcSmartspaceCard",
+                        bcSmartspaceCardLoggingInfo,
+                        0);
             }
         } else {
-            if (smartspaceTarget.getFeatureType() == 1 && bcSmartspaceCardLoggingInfo2.mFeatureType == 39) {
+            if (smartspaceTarget.getFeatureType() == 1
+                    && bcSmartspaceCardLoggingInfo2.mFeatureType == 39) {
                 getClickedIndex(bcSmartspaceCardLoggingInfo2, 1);
             }
             if (headerAction != null) {
-                BcSmartSpaceUtil.setOnClickListener(this, smartspaceTarget, headerAction, this.mEventNotifier, "BcSmartspaceCard", bcSmartspaceCardLoggingInfo2, 0);
+                BcSmartSpaceUtil.setOnClickListener(
+                        this,
+                        smartspaceTarget,
+                        headerAction,
+                        this.mEventNotifier,
+                        "BcSmartspaceCard",
+                        bcSmartspaceCardLoggingInfo2,
+                        0);
             }
         }
         ViewGroup viewGroup4 = this.mSecondaryCardGroup;
         if (viewGroup4 == null) {
             return;
         }
-        ConstraintLayout.LayoutParams layoutParams = (ConstraintLayout.LayoutParams) viewGroup4.getLayoutParams();
+        ConstraintLayout.LayoutParams layoutParams =
+                (ConstraintLayout.LayoutParams) viewGroup4.getLayoutParams();
         if (BcSmartSpaceUtil.getFeatureType(smartspaceTarget) == -2) {
             layoutParams.matchConstraintMaxWidth = (getWidth() * 3) / 4;
         } else {
@@ -236,7 +308,11 @@ public class BcSmartspaceCard extends ConstraintLayout implements SmartspaceCard
     @Override
     public final void onFinishInflate() {
         super.onFinishInflate();
-        setPaddingRelative(getResources().getDimensionPixelSize(R.dimen.non_remoteviews_card_padding_start), getPaddingTop(), getPaddingEnd(), getPaddingBottom());
+        setPaddingRelative(
+                getResources().getDimensionPixelSize(R.dimen.non_remoteviews_card_padding_start),
+                getPaddingTop(),
+                getPaddingEnd(),
+                getPaddingBottom());
         mTextGroup = (ViewGroup) findViewById(R.id.text_group);
         mSecondaryCardGroup = (ViewGroup) findViewById(R.id.secondary_card_group);
         mTitleTextView = (TextView) findViewById(R.id.title_text);
@@ -248,7 +324,8 @@ public class BcSmartspaceCard extends ConstraintLayout implements SmartspaceCard
     }
 
     /* JADX DEBUG: Don't trust debug lines info. Lines numbers was adjusted: min line is 1 */
-    @Override // androidx.constraintlayout.widget.ConstraintLayout, android.view.ViewGroup, android.view.View
+    @Override // androidx.constraintlayout.widget.ConstraintLayout, android.view.ViewGroup,
+    // android.view.View
     public final void onLayout(boolean z, int i, int i2, int i3, int i4) {
         super.onLayout(z, i, i2, i3, i4);
         if (z || this.mTouchDelegateIsDirty) {
@@ -258,21 +335,31 @@ public class BcSmartspaceCard extends ConstraintLayout implements SmartspaceCard
             if (doubleShadowTextView == null || doubleShadowTextView.getVisibility() != 0) {
                 return;
             }
-            int dimensionPixelSize = (getResources().getDimensionPixelSize(R.dimen.subtitle_hit_rect_height) - this.mBaseActionIconSubtitleView.getHeight()) / 2;
+            int dimensionPixelSize =
+                    (getResources().getDimensionPixelSize(R.dimen.subtitle_hit_rect_height)
+                                    - this.mBaseActionIconSubtitleView.getHeight())
+                            / 2;
             this.mBaseActionIconSubtitleView.getHitRect(this.mBaseActionIconSubtitleHitRect);
-            offsetDescendantRectToMyCoords((View) this.mBaseActionIconSubtitleView.getParent(), this.mBaseActionIconSubtitleHitRect);
-            if (dimensionPixelSize > 0 || this.mBaseActionIconSubtitleHitRect.bottom != getHeight()) {
+            offsetDescendantRectToMyCoords(
+                    (View) this.mBaseActionIconSubtitleView.getParent(),
+                    this.mBaseActionIconSubtitleHitRect);
+            if (dimensionPixelSize > 0
+                    || this.mBaseActionIconSubtitleHitRect.bottom != getHeight()) {
                 if (dimensionPixelSize > 0) {
                     this.mBaseActionIconSubtitleHitRect.top -= dimensionPixelSize;
                 }
                 this.mBaseActionIconSubtitleHitRect.bottom = getHeight();
-                setTouchDelegate(new TouchDelegate(this.mBaseActionIconSubtitleHitRect, this.mBaseActionIconSubtitleView));
+                setTouchDelegate(
+                        new TouchDelegate(
+                                this.mBaseActionIconSubtitleHitRect,
+                                this.mBaseActionIconSubtitleView));
             }
         }
     }
 
     /* JADX DEBUG: Don't trust debug lines info. Lines numbers was adjusted: min line is 1 */
-    public final void setBaseActionIconSubtitle(CharSequence charSequence, CharSequence charSequence2, Drawable drawable) {
+    public final void setBaseActionIconSubtitle(
+            CharSequence charSequence, CharSequence charSequence2, Drawable drawable) {
         if (this.mBaseActionIconSubtitleView == null) {
             Log.w("BcSmartspaceCard", "No base action icon subtitle view to update");
             return;
@@ -284,7 +371,8 @@ public class BcSmartspaceCard extends ConstraintLayout implements SmartspaceCard
         BcSmartspaceTemplateDataUtils.updateVisibility(this.mBaseActionIconSubtitleView, 0);
         this.mBaseActionIconSubtitleView.setText(charSequence);
         this.mBaseActionIconSubtitleView.setCompoundDrawablesRelative(drawable, null, null, null);
-        ContentDescriptionUtil.setFormattedContentDescription("BcSmartspaceCard", this.mBaseActionIconSubtitleView, charSequence, charSequence2);
+        ContentDescriptionUtil.setFormattedContentDescription(
+                "BcSmartspaceCard", this.mBaseActionIconSubtitleView, charSequence, charSequence2);
     }
 
     /* JADX DEBUG: Don't trust debug lines info. Lines numbers was adjusted: min line is 1 */
@@ -292,7 +380,9 @@ public class BcSmartspaceCard extends ConstraintLayout implements SmartspaceCard
     public final void setDozeAmount(float f) {
         this.mDozeAmount = f;
         SmartspaceTarget smartspaceTarget = this.mTarget;
-        if (smartspaceTarget != null && smartspaceTarget.getBaseAction() != null && this.mTarget.getBaseAction().getExtras() != null) {
+        if (smartspaceTarget != null
+                && smartspaceTarget.getBaseAction() != null
+                && this.mTarget.getBaseAction().getExtras() != null) {
             Bundle extras = this.mTarget.getBaseAction().getExtras();
             if (this.mTitleTextView != null && extras.getBoolean("hide_title_on_aod")) {
                 this.mTitleTextView.setAlpha(1.0f - f);
@@ -304,7 +394,9 @@ public class BcSmartspaceCard extends ConstraintLayout implements SmartspaceCard
         if (this.mTextGroup == null) {
             return;
         }
-        BcSmartspaceTemplateDataUtils.updateVisibility(this.mSecondaryCardGroup, (this.mDozeAmount == 1.0f || !this.mValidSecondaryCard) ? 8 : 0);
+        BcSmartspaceTemplateDataUtils.updateVisibility(
+                this.mSecondaryCardGroup,
+                (this.mDozeAmount == 1.0f || !this.mValidSecondaryCard) ? 8 : 0);
         SmartspaceTarget smartspaceTarget2 = this.mTarget;
         if (smartspaceTarget2 == null || smartspaceTarget2.getFeatureType() != 30) {
             ViewGroup viewGroup = this.mSecondaryCardGroup;
@@ -312,8 +404,12 @@ public class BcSmartspaceCard extends ConstraintLayout implements SmartspaceCard
                 this.mTextGroup.setTranslationX(0.0f);
                 return;
             }
-            this.mTextGroup.setTranslationX(((PathInterpolator) Interpolators.EMPHASIZED).getInterpolation(this.mDozeAmount) * this.mSecondaryCardGroup.getWidth() * (isRtl() ? 1 : -1));
-            this.mSecondaryCardGroup.setAlpha(Math.max(0.0f, Math.min(1.0f, ((1.0f - this.mDozeAmount) * 9.0f) - 6.0f)));
+            this.mTextGroup.setTranslationX(
+                    ((PathInterpolator) Interpolators.EMPHASIZED).getInterpolation(this.mDozeAmount)
+                            * this.mSecondaryCardGroup.getWidth()
+                            * (isRtl() ? 1 : -1));
+            this.mSecondaryCardGroup.setAlpha(
+                    Math.max(0.0f, Math.min(1.0f, ((1.0f - this.mDozeAmount) * 9.0f) - 6.0f)));
         }
     }
 
@@ -340,37 +436,26 @@ public class BcSmartspaceCard extends ConstraintLayout implements SmartspaceCard
         updateIconTint();
     }
 
-    public final void setSecondaryCard(BcSmartspaceCardSecondary secondaryCard) {
-        if (mSecondaryCardGroup == null) {
-            return;
-        }
-        mSecondaryCard = secondaryCard;
-        BcSmartspaceTemplateDataUtils.updateVisibility(mSecondaryCardGroup, View.GONE);
-        mSecondaryCardGroup.removeAllViews();
-        if (secondaryCard != null) {
-            ConstraintLayout.LayoutParams params = new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, getResources().getDimensionPixelSize(R.dimen.enhanced_smartspace_card_height));
-            params.setMarginStart(getResources().getDimensionPixelSize(R.dimen.enhanced_smartspace_secondary_card_start_margin));
-            params.startToStart = 0;
-            params.topToTop = 0;
-            params.bottomToBottom = 0;
-            mSecondaryCardGroup.addView(secondaryCard, params);
-        }
-    }
-
-    public final void setSubtitle(CharSequence text, CharSequence contentDescription, boolean useIcon) {
+    public final void setSubtitle(
+            CharSequence text, CharSequence contentDescription, boolean useIcon) {
         if (mSubtitleTextView == null) {
             Log.w("BcSmartspaceCard", "No subtitle view to update");
             return;
         }
         mSubtitleTextView.setText(text);
-        mSubtitleTextView.setCompoundDrawablesRelative((TextUtils.isEmpty(text) || !useIcon) ? null : mIconDrawable, null, null, null);
-        mSubtitleTextView.setMaxLines((mTarget == null || mTarget.getFeatureType() != 5 || mUsePageIndicatorUi) ? 1 : 2);
-        ContentDescriptionUtil.setFormattedContentDescription("BcSmartspaceCard", mSubtitleTextView, text, contentDescription);
-        BcSmartspaceTemplateDataUtils.offsetTextViewForIcon(mSubtitleTextView, useIcon ? mIconDrawable : null, isRtl());
+        mSubtitleTextView.setCompoundDrawablesRelative(
+                (TextUtils.isEmpty(text) || !useIcon) ? null : mIconDrawable, null, null, null);
+        mSubtitleTextView.setMaxLines(
+                (mTarget == null || mTarget.getFeatureType() != 5 || mUsePageIndicatorUi) ? 1 : 2);
+        ContentDescriptionUtil.setFormattedContentDescription(
+                "BcSmartspaceCard", mSubtitleTextView, text, contentDescription);
+        BcSmartspaceTemplateDataUtils.offsetTextViewForIcon(
+                mSubtitleTextView, useIcon ? mIconDrawable : null, isRtl());
     }
 
     /* JADX DEBUG: Don't trust debug lines info. Lines numbers was adjusted: min line is 1 */
-    public final void setTitle(CharSequence text, CharSequence contentDescription, boolean useIcon) {
+    public final void setTitle(
+            CharSequence text, CharSequence contentDescription, boolean useIcon) {
         boolean z2;
         if (mTitleTextView == null) {
             Log.w("BcSmartspaceCard", "No title view to update");
@@ -380,14 +465,19 @@ public class BcSmartspaceCard extends ConstraintLayout implements SmartspaceCard
         SmartspaceAction headerAction = mTarget == null ? null : mTarget.getHeaderAction();
         Bundle extras = headerAction == null ? null : headerAction.getExtras();
         if (extras == null || !extras.containsKey("titleEllipsize")) {
-            if (mTarget != null && mTarget.getFeatureType() == 2 && Locale.ENGLISH.getLanguage().equals(getResources().getConfiguration().locale.getLanguage())) {
+            if (mTarget != null
+                    && mTarget.getFeatureType() == 2
+                    && Locale.ENGLISH
+                            .getLanguage()
+                            .equals(getResources().getConfiguration().locale.getLanguage())) {
                 mTitleTextView.setEllipsize(TextUtils.TruncateAt.MIDDLE);
             } else {
                 mTitleTextView.setEllipsize(TextUtils.TruncateAt.END);
             }
         } else {
             try {
-                mTitleTextView.setEllipsize(TextUtils.TruncateAt.valueOf(extras.getString("titleEllipsize")));
+                mTitleTextView.setEllipsize(
+                        TextUtils.TruncateAt.valueOf(extras.getString("titleEllipsize")));
             } catch (IllegalArgumentException unused) {
                 Log.w(
                         "BcSmartspaceCard",
@@ -407,10 +497,12 @@ public class BcSmartspaceCard extends ConstraintLayout implements SmartspaceCard
             z3 = true;
         }
         if (z3) {
-            ContentDescriptionUtil.setFormattedContentDescription("BcSmartspaceCard", mTitleTextView, text, contentDescription);
+            ContentDescriptionUtil.setFormattedContentDescription(
+                    "BcSmartspaceCard", mTitleTextView, text, contentDescription);
         }
         mTitleTextView.setCompoundDrawablesRelative(z3 ? mIconDrawable : null, null, null, null);
-        BcSmartspaceTemplateDataUtils.offsetTextViewForIcon(mTitleTextView, z3 ? mIconDrawable : null, isRtl());
+        BcSmartspaceTemplateDataUtils.offsetTextViewForIcon(
+                mTitleTextView, z3 ? mIconDrawable : null, isRtl());
     }
 
     public final void updateIconTint() {
@@ -424,7 +516,9 @@ public class BcSmartspaceCard extends ConstraintLayout implements SmartspaceCard
         }
         SmartspaceAction baseAction = mTarget.getBaseAction();
         int subcardType = -1;
-        if (baseAction != null && baseAction.getExtras() != null && !baseAction.getExtras().isEmpty()) {
+        if (baseAction != null
+                && baseAction.getExtras() != null
+                && !baseAction.getExtras().isEmpty()) {
             subcardType = baseAction.getExtras().getInt("subcardType", -1);
         }
         if (subcardType == 1) {
@@ -458,6 +552,5 @@ public class BcSmartspaceCard extends ConstraintLayout implements SmartspaceCard
     }
 
     @Override
-    public final void setScreenOn(boolean screenOn) {
-    }
+    public final void setScreenOn(boolean screenOn) {}
 }

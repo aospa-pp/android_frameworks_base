@@ -27,8 +27,7 @@ import androidx.core.view.accessibility.AccessibilityNodeInfoCompat;
 import com.android.app.animation.Interpolators;
 import com.android.launcher3.icons.GraphicsUtils;
 import com.android.systemui.plugins.BcSmartspaceDataPlugin;
-import com.android.systemui.plugins.FalsingManager;
-import com.android.systemui.smartspace.nano.SmartspaceProto;
+import com.android.systemui.res.R;
 
 import com.google.android.systemui.smartspace.BcSmartSpaceUtil;
 import com.google.android.systemui.smartspace.BcSmartspaceCardSecondary;
@@ -41,14 +40,8 @@ import com.google.android.systemui.smartspace.TouchDelegateComposite;
 import com.google.android.systemui.smartspace.logging.BcSmartspaceCardLoggerUtil;
 import com.google.android.systemui.smartspace.logging.BcSmartspaceCardLoggingInfo;
 import com.google.android.systemui.smartspace.logging.BcSmartspaceCardMetadataLoggingInfo;
-import com.google.android.systemui.smartspace.logging.BcSmartspaceSubcardLoggingInfo;
 import com.google.android.systemui.smartspace.utils.ContentDescriptionUtil;
 
-import com.android.systemui.res.R;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 public class BaseTemplateCard extends ConstraintLayout implements SmartspaceCard {
@@ -90,7 +83,11 @@ public class BaseTemplateCard extends ConstraintLayout implements SmartspaceCard
     }
 
     @Override
-    public final void bindData(SmartspaceTarget target, BcSmartspaceDataPlugin.SmartspaceEventNotifier eventNotifier, BcSmartspaceCardLoggingInfo loggingInfo, boolean shouldShowPageIndicator) {
+    public final void bindData(
+            SmartspaceTarget target,
+            BcSmartspaceDataPlugin.SmartspaceEventNotifier eventNotifier,
+            BcSmartspaceCardLoggingInfo loggingInfo,
+            boolean shouldShowPageIndicator) {
         mTarget = null;
         mTemplateData = null;
         mFeatureType = 0;
@@ -106,13 +103,6 @@ public class BaseTemplateCard extends ConstraintLayout implements SmartspaceCard
         resetTextView(mSubtitleTextView);
         resetTextView(mSubtitleSupplementalView);
         resetTextView(mSupplementalLineTextView);
-        BcSmartspaceTemplateDataUtils.updateVisibility(mTitleTextView, View.GONE);
-        BcSmartspaceTemplateDataUtils.updateVisibility(mSubtitleGroup, View.GONE);
-        BcSmartspaceTemplateDataUtils.updateVisibility(mSubtitleAqiChipView, View.GONE);
-        BcSmartspaceTemplateDataUtils.updateVisibility(mSubtitleTextView, View.GONE);
-        BcSmartspaceTemplateDataUtils.updateVisibility(mSubtitleSupplementalView, View.GONE);
-        BcSmartspaceTemplateDataUtils.updateVisibility(mSecondaryCardPane, View.GONE);
-        BcSmartspaceTemplateDataUtils.updateVisibility(mExtrasGroup, View.GONE);
         mTarget = target;
         mTemplateData = target.getTemplateData();
         mFeatureType = target.getFeatureType();
@@ -129,10 +119,15 @@ public class BaseTemplateCard extends ConstraintLayout implements SmartspaceCard
         if (mSecondaryCard != null) {
             Log.i("SsBaseTemplateCard", "Secondary card is not null");
             mSecondaryCard.reset(target.getSmartspaceTargetId());
-            mValidSecondaryCard = mSecondaryCard.setSmartspaceActions(target, eventNotifier, mLoggingInfo);
+            mValidSecondaryCard =
+                    mSecondaryCard.setSmartspaceActions(target, eventNotifier, mLoggingInfo);
         }
         if (mSecondaryCardPane != null) {
-            BcSmartspaceTemplateDataUtils.updateVisibility(mSecondaryCardPane, (mDozeAmount == 1.0f || !mValidSecondaryCard) ? View.GONE : View.VISIBLE);
+            BcSmartspaceTemplateDataUtils.updateVisibility(
+                    mSecondaryCardPane,
+                    (mDozeAmount == 1.0f || !mValidSecondaryCard) ? View.GONE : View.VISIBLE);
+        } else {
+            BcSmartspaceTemplateDataUtils.updateVisibility(mSecondaryCardPane, View.GONE);
         }
         if (mDateView == null) {
             Log.d("SsBaseTemplateCard", "No date view can be set up");
@@ -140,40 +135,132 @@ public class BaseTemplateCard extends ConstraintLayout implements SmartspaceCard
             if (TextUtils.isEmpty(mDateView.getText())) {
                 Log.d("SsBaseTemplateCard", "Date view text is empty");
             }
-            TapAction tapAction = new TapAction.Builder((mTemplateData.getPrimaryItem() == null || mTemplateData.getPrimaryItem().getTapAction() == null) ? UUID.randomUUID().toString() : mTemplateData.getPrimaryItem().getTapAction().getId().toString()).setIntent(BcSmartSpaceUtil.getOpenCalendarIntent()).build();
-            BcSmartSpaceUtil.setOnClickListener(this, mTarget, tapAction, eventNotifier, "SsBaseTemplateCard", loggingInfo, 0);
-            BcSmartSpaceUtil.setOnClickListener(mDateView, mTarget, tapAction, eventNotifier, "SsBaseTemplateCard", loggingInfo, 0);
+            TapAction tapAction =
+                    new TapAction.Builder(
+                                    (mTemplateData.getPrimaryItem() == null
+                                                    || mTemplateData.getPrimaryItem().getTapAction()
+                                                            == null)
+                                            ? UUID.randomUUID().toString()
+                                            : mTemplateData
+                                                    .getPrimaryItem()
+                                                    .getTapAction()
+                                                    .getId()
+                                                    .toString())
+                            .setIntent(BcSmartSpaceUtil.getOpenCalendarIntent())
+                            .build();
+            BcSmartSpaceUtil.setOnClickListener(
+                    this, mTarget, tapAction, eventNotifier, "SsBaseTemplateCard", loggingInfo, 0);
+            BcSmartSpaceUtil.setOnClickListener(
+                    mDateView,
+                    mTarget,
+                    tapAction,
+                    eventNotifier,
+                    "SsBaseTemplateCard",
+                    loggingInfo,
+                    0);
         }
-        setUpTextView(mTitleTextView, mTemplateData.getPrimaryItem(), eventNotifier, mDateView == null);
+        setUpTextView(
+                mTitleTextView, mTemplateData.getPrimaryItem(), eventNotifier, mDateView == null);
         setUpTextView(mSubtitleTextView, mTemplateData.getSubtitleItem(), eventNotifier, true);
-        setUpTextView(mSubtitleSupplementalView, mTemplateData.getSubtitleSupplementalItem(), eventNotifier, true);
-        setUpTextView(mSupplementalLineTextView, mTemplateData.getSupplementalLineItem(), eventNotifier, true);
+        setUpTextView(
+                mSubtitleSupplementalView,
+                mTemplateData.getSubtitleSupplementalItem(),
+                eventNotifier,
+                true);
+        setUpTextView(
+                mSupplementalLineTextView,
+                mTemplateData.getSupplementalLineItem(),
+                eventNotifier,
+                true);
         if (mExtrasGroup != null) {
-            if (mSupplementalLineTextView == null || mSupplementalLineTextView.getVisibility() != View.VISIBLE || (mShouldShowPageIndicator && mDateView == null)) {
+            if (mSupplementalLineTextView == null
+                    || mSupplementalLineTextView.getVisibility() != View.VISIBLE
+                    || (mShouldShowPageIndicator && mDateView == null)) {
                 BcSmartspaceTemplateDataUtils.updateVisibility(mExtrasGroup, View.GONE);
             } else {
                 BcSmartspaceTemplateDataUtils.updateVisibility(mExtrasGroup, View.VISIBLE);
                 updateZenColors();
             }
         }
-        BcSmartspaceTemplateDataUtils.updateVisibility(mSubtitleGroup, mSubtitleAqiChipView.getVisibility() != View.GONE || mSubtitleTextView.getVisibility() != View.GONE || mSubtitleSupplementalView.getVisibility() != View.GONE ? View.VISIBLE : View.GONE);
-        if (target.getFeatureType() == 1 && mSubtitleSupplementalView != null && mSubtitleSupplementalView.getVisibility() == View.VISIBLE) {
+        BcSmartspaceTemplateDataUtils.updateVisibility(
+                mSubtitleGroup,
+                mSubtitleAqiChipView.getVisibility() != View.GONE
+                                || mSubtitleTextView.getVisibility() != View.GONE
+                                || mSubtitleSupplementalView.getVisibility() != View.GONE
+                        ? View.VISIBLE
+                        : View.GONE);
+        if (target.getFeatureType() == 1
+                && mSubtitleSupplementalView != null
+                && mSubtitleSupplementalView.getVisibility() == View.VISIBLE) {
             mSubtitleTextView.setEllipsize(null);
         }
-        if (mDateView == null && mTemplateData.getPrimaryItem() != null && mTemplateData.getPrimaryItem().getTapAction() != null) {
-            BcSmartSpaceUtil.setOnClickListener(this, target, mTemplateData.getPrimaryItem().getTapAction(), eventNotifier, "SsBaseTemplateCard", mLoggingInfo, 0);
-            if (mDateView == null && mTitleTextView != null && mTitleTextView.getVisibility() == View.VISIBLE && mSubtitleTextView != null && mSubtitleTextView.getVisibility() == View.VISIBLE && mTemplateData.getPrimaryItem() != null && mTemplateData.getPrimaryItem().getTapAction() != null && mTemplateData.getSubtitleItem() != null && mTemplateData.getSubtitleItem().getTapAction() != null) {
-                if (mTemplateData.getPrimaryItem().getTapAction().getIntent() != null && !mTemplateData.getPrimaryItem().getTapAction().getIntent().filterEquals(mTemplateData.getSubtitleItem().getTapAction().getIntent())) {
-                    Log.d("SsBaseTemplateCard", "Primary item tapAction intent = " + mTemplateData.getPrimaryItem().getTapAction().getIntent());
-                    Log.d("SsBaseTemplateCard", "Subtitle item tapAction intent = " + mTemplateData.getSubtitleItem().getTapAction().getIntent());
-                } else if (mTemplateData.getPrimaryItem().getTapAction().getPendingIntent() == null || mTemplateData.getPrimaryItem().getTapAction().getPendingIntent().equals(mTemplateData.getSubtitleItem().getTapAction().getPendingIntent())) {
+        if (mDateView == null
+                && mTemplateData.getPrimaryItem() != null
+                && mTemplateData.getPrimaryItem().getTapAction() != null) {
+            BcSmartSpaceUtil.setOnClickListener(
+                    this,
+                    target,
+                    mTemplateData.getPrimaryItem().getTapAction(),
+                    eventNotifier,
+                    "SsBaseTemplateCard",
+                    mLoggingInfo,
+                    0);
+            if (mDateView == null
+                    && mTitleTextView != null
+                    && mTitleTextView.getVisibility() == View.VISIBLE
+                    && mSubtitleTextView != null
+                    && mSubtitleTextView.getVisibility() == View.VISIBLE
+                    && mTemplateData.getPrimaryItem() != null
+                    && mTemplateData.getPrimaryItem().getTapAction() != null
+                    && mTemplateData.getSubtitleItem() != null
+                    && mTemplateData.getSubtitleItem().getTapAction() != null) {
+                if (mTemplateData.getPrimaryItem().getTapAction().getIntent() != null
+                        && !mTemplateData
+                                .getPrimaryItem()
+                                .getTapAction()
+                                .getIntent()
+                                .filterEquals(
+                                        mTemplateData
+                                                .getSubtitleItem()
+                                                .getTapAction()
+                                                .getIntent())) {
+                    Log.d(
+                            "SsBaseTemplateCard",
+                            "Primary item tapAction intent = "
+                                    + mTemplateData.getPrimaryItem().getTapAction().getIntent());
+                    Log.d(
+                            "SsBaseTemplateCard",
+                            "Subtitle item tapAction intent = "
+                                    + mTemplateData.getSubtitleItem().getTapAction().getIntent());
+                } else if (mTemplateData.getPrimaryItem().getTapAction().getPendingIntent() == null
+                        || mTemplateData
+                                .getPrimaryItem()
+                                .getTapAction()
+                                .getPendingIntent()
+                                .equals(
+                                        mTemplateData
+                                                .getSubtitleItem()
+                                                .getTapAction()
+                                                .getPendingIntent())) {
                     mTitleTextView.setOnClickListener(null);
                     mTitleTextView.setClickable(false);
                     mSubtitleTextView.setOnClickListener(null);
                     mSubtitleTextView.setClickable(false);
                 } else {
-                    Log.d("SsBaseTemplateCard", "Primary item tapAction pendingIntent = " + mTemplateData.getPrimaryItem().getTapAction().getPendingIntent());
-                    Log.d("SsBaseTemplateCard", "Subtitle item tapAction pendingIntent = " + mTemplateData.getSubtitleItem().getTapAction().getPendingIntent());
+                    Log.d(
+                            "SsBaseTemplateCard",
+                            "Primary item tapAction pendingIntent = "
+                                    + mTemplateData
+                                            .getPrimaryItem()
+                                            .getTapAction()
+                                            .getPendingIntent());
+                    Log.d(
+                            "SsBaseTemplateCard",
+                            "Subtitle item tapAction pendingIntent = "
+                                    + mTemplateData
+                                            .getSubtitleItem()
+                                            .getTapAction()
+                                            .getPendingIntent());
                 }
             }
         }
@@ -181,7 +268,8 @@ public class BaseTemplateCard extends ConstraintLayout implements SmartspaceCard
             Log.i("SsBaseTemplateCard", "Secondary card pane is null");
             return;
         }
-        ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) mSecondaryCardPane.getLayoutParams();
+        ConstraintLayout.LayoutParams params =
+                (ConstraintLayout.LayoutParams) mSecondaryCardPane.getLayoutParams();
         params.matchConstraintMaxWidth = getWidth() / 2;
         mSecondaryCardPane.setLayoutParams(params);
         mTouchDelegateIsDirty = true;
@@ -213,7 +301,11 @@ public class BaseTemplateCard extends ConstraintLayout implements SmartspaceCard
     @Override
     public final void onFinishInflate() {
         super.onFinishInflate();
-        setPaddingRelative(getResources().getDimensionPixelSize(R.dimen.non_remoteviews_card_padding_start), getPaddingTop(), getPaddingEnd(), getPaddingBottom());
+        setPaddingRelative(
+                getResources().getDimensionPixelSize(R.dimen.non_remoteviews_card_padding_start),
+                getPaddingTop(),
+                getPaddingEnd(),
+                getPaddingBottom());
         mTextGroup = findViewById(R.id.text_group);
         mSecondaryCardPane = findViewById(R.id.secondary_card_group);
         mDateView = findViewById(R.id.date);
@@ -256,12 +348,14 @@ public class BaseTemplateCard extends ConstraintLayout implements SmartspaceCard
         if (mSubtitleGroup == null || mSubtitleGroup.getVisibility() != View.VISIBLE) {
             return;
         }
-        boolean subtitleTextVisible = mSubtitleTextView != null 
-                && mSubtitleTextView.getVisibility() == View.VISIBLE
-                && mSubtitleTextView.hasOnClickListeners();
-        boolean subtitleSupplementalVisible = mSubtitleSupplementalView != null
-                && mSubtitleSupplementalView.getVisibility() == View.VISIBLE
-                && mSubtitleSupplementalView.hasOnClickListeners();
+        boolean subtitleTextVisible =
+                mSubtitleTextView != null
+                        && mSubtitleTextView.getVisibility() == View.VISIBLE
+                        && mSubtitleTextView.hasOnClickListeners();
+        boolean subtitleSupplementalVisible =
+                mSubtitleSupplementalView != null
+                        && mSubtitleSupplementalView.getVisibility() == View.VISIBLE
+                        && mSubtitleSupplementalView.hasOnClickListeners();
         if (!subtitleTextVisible && !subtitleSupplementalVisible) {
             return;
         }
@@ -308,7 +402,9 @@ public class BaseTemplateCard extends ConstraintLayout implements SmartspaceCard
     @Override
     public final void setDozeAmount(float dozeAmount) {
         mDozeAmount = dozeAmount;
-        if (mTarget != null && mTarget.getBaseAction() != null && mTarget.getBaseAction().getExtras() != null) {
+        if (mTarget != null
+                && mTarget.getBaseAction() != null
+                && mTarget.getBaseAction().getExtras() != null) {
             Bundle extras = mTarget.getBaseAction().getExtras();
             if (mTitleTextView != null && extras.getBoolean("hide_title_on_aod")) {
                 mTitleTextView.setAlpha(1.0f - dozeAmount);
@@ -320,13 +416,19 @@ public class BaseTemplateCard extends ConstraintLayout implements SmartspaceCard
         if (mTextGroup == null) {
             return;
         }
-        BcSmartspaceTemplateDataUtils.updateVisibility(mSecondaryCardPane, (mDozeAmount == 1.0f || !mValidSecondaryCard) ? View.GONE : View.VISIBLE);
+        BcSmartspaceTemplateDataUtils.updateVisibility(
+                mSecondaryCardPane,
+                (mDozeAmount == 1.0f || !mValidSecondaryCard) ? View.GONE : View.VISIBLE);
         if (mSecondaryCardPane == null || mSecondaryCardPane.getVisibility() == View.GONE) {
             mTextGroup.setTranslationX(0.0f);
             return;
         }
-        mTextGroup.setTranslationX(((PathInterpolator) Interpolators.EMPHASIZED).getInterpolation(mDozeAmount) * mSecondaryCardPane.getWidth() * (isRtl() ? 1 : -1));
-        mSecondaryCardPane.setAlpha(Math.max(0.0f, Math.min(1.0f, ((1.0f - mDozeAmount) * 9.0f) - 6.0f)));
+        mTextGroup.setTranslationX(
+                ((PathInterpolator) Interpolators.EMPHASIZED).getInterpolation(mDozeAmount)
+                        * mSecondaryCardPane.getWidth()
+                        * (isRtl() ? 1 : -1));
+        mSecondaryCardPane.setAlpha(
+                Math.max(0.0f, Math.min(1.0f, ((1.0f - mDozeAmount) * 9.0f) - 6.0f)));
     }
 
     @Override
@@ -347,13 +449,16 @@ public class BaseTemplateCard extends ConstraintLayout implements SmartspaceCard
         if (mSubtitleTextView != null) {
             mSubtitleTextView.setTextColor(color);
             if (mTemplateData != null) {
-                updateTextViewIconTint(mSubtitleTextView, shouldTint(mTemplateData.getSubtitleItem()));
+                updateTextViewIconTint(
+                        mSubtitleTextView, shouldTint(mTemplateData.getSubtitleItem()));
             }
         }
         if (mSubtitleSupplementalView != null) {
             mSubtitleSupplementalView.setTextColor(color);
             if (mTemplateData != null) {
-                updateTextViewIconTint(mSubtitleSupplementalView, shouldTint(mTemplateData.getSubtitleSupplementalItem()));
+                updateTextViewIconTint(
+                        mSubtitleSupplementalView,
+                        shouldTint(mTemplateData.getSubtitleSupplementalItem()));
             }
         }
         updateZenColors();
@@ -366,24 +471,12 @@ public class BaseTemplateCard extends ConstraintLayout implements SmartspaceCard
             mDateView.rescheduleTicker();
         }
     }
-    public final void setSecondaryCard(BcSmartspaceCardSecondary secondaryCard) {
-        if (mSecondaryCardPane == null) {
-            return;
-        }
-        mSecondaryCard = secondaryCard;
-        BcSmartspaceTemplateDataUtils.updateVisibility(mSecondaryCardPane, View.GONE);
-        mSecondaryCardPane.removeAllViews();
-        if (secondaryCard != null) {
-            ConstraintLayout.LayoutParams params = new ConstraintLayout.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, getResources().getDimensionPixelSize(R.dimen.enhanced_smartspace_card_height));
-            params.setMarginStart(getResources().getDimensionPixelSize(R.dimen.enhanced_smartspace_secondary_card_start_margin));
-            params.startToStart = 0;
-            params.topToTop = 0;
-            params.bottomToBottom = 0;
-            mSecondaryCardPane.addView(secondaryCard, params);
-        }
-    }
 
-    public final void setUpTextView(DoubleShadowTextView textView, BaseTemplateData.SubItemInfo subItemInfo, BcSmartspaceDataPlugin.SmartspaceEventNotifier eventNotifier, boolean z) {
+    public final void setUpTextView(
+            DoubleShadowTextView textView,
+            BaseTemplateData.SubItemInfo subItemInfo,
+            BcSmartspaceDataPlugin.SmartspaceEventNotifier eventNotifier,
+            boolean z) {
         if (textView == null) {
             Log.d("SsBaseTemplateCard", "No text view can be set up");
             return;
@@ -421,9 +514,19 @@ public class BaseTemplateCard extends ConstraintLayout implements SmartspaceCard
             }
         } else if (icon != null) {
             DoubleShadowIconDrawable drawable = new DoubleShadowIconDrawable(getContext());
-            drawable.setIcon(BcSmartSpaceUtil.getIconDrawableWithCustomSize(icon.getIcon(), getContext(), getContext().getResources().getDimensionPixelSize(R.dimen.enhanced_smartspace_icon_size)));
+            drawable.setIcon(
+                    BcSmartSpaceUtil.getIconDrawableWithCustomSize(
+                            icon.getIcon(),
+                            getContext(),
+                            getContext()
+                                    .getResources()
+                                    .getDimensionPixelSize(R.dimen.enhanced_smartspace_icon_size)));
             textView.setCompoundDrawablesRelative(drawable, null, null, null);
-            ContentDescriptionUtil.setFormattedContentDescription("SsBaseTemplateCard", textView, SmartspaceUtils.isEmpty(text) ? "" : text.getText(), icon.getContentDescription());
+            ContentDescriptionUtil.setFormattedContentDescription(
+                    "SsBaseTemplateCard",
+                    textView,
+                    SmartspaceUtils.isEmpty(text) ? "" : text.getText(),
+                    icon.getContentDescription());
             updateTextViewIconTint(textView, icon.shouldTint());
             if (z) {
                 BcSmartspaceTemplateDataUtils.offsetTextViewForIcon(textView, drawable, isRtl());
@@ -432,7 +535,11 @@ public class BaseTemplateCard extends ConstraintLayout implements SmartspaceCard
         int subCardRank = 0;
         BcSmartspaceTemplateDataUtils.updateVisibility(textView, View.VISIBLE);
         TapAction tapAction = subItemInfo.getTapAction();
-        if (mLoggingInfo != null && mLoggingInfo.mSubcardInfo != null && mLoggingInfo.mSubcardInfo.mSubcards != null && !mLoggingInfo.mSubcardInfo.mSubcards.isEmpty() && subItemInfo.getLoggingInfo() != null) {
+        if (mLoggingInfo != null
+                && mLoggingInfo.mSubcardInfo != null
+                && mLoggingInfo.mSubcardInfo.mSubcards != null
+                && !mLoggingInfo.mSubcardInfo.mSubcards.isEmpty()
+                && subItemInfo.getLoggingInfo() != null) {
             int targetFeatureType = subItemInfo.getLoggingInfo().getFeatureType();
             if (targetFeatureType != mLoggingInfo.mFeatureType) {
                 for (int i = 0; i < mLoggingInfo.mSubcardInfo.mSubcards.size(); i++) {
@@ -446,7 +553,14 @@ public class BaseTemplateCard extends ConstraintLayout implements SmartspaceCard
                 }
             }
         }
-        BcSmartSpaceUtil.setOnClickListener(textView, mTarget, tapAction, eventNotifier, "SsBaseTemplateCard", mLoggingInfo, subCardRank);
+        BcSmartSpaceUtil.setOnClickListener(
+                textView,
+                mTarget,
+                tapAction,
+                eventNotifier,
+                "SsBaseTemplateCard",
+                mLoggingInfo,
+                subCardRank);
     }
 
     public final void updateTextViewIconTint(DoubleShadowTextView textView, boolean shouldTint) {
@@ -465,7 +579,9 @@ public class BaseTemplateCard extends ConstraintLayout implements SmartspaceCard
         if (mSupplementalLineTextView != null) {
             mSupplementalLineTextView.setTextColor(mIconTintColor);
             if (BcSmartspaceCardLoggerUtil.containsValidTemplateType(mTemplateData)) {
-                updateTextViewIconTint(mSupplementalLineTextView, shouldTint(mTemplateData.getSupplementalLineItem()));
+                updateTextViewIconTint(
+                        mSupplementalLineTextView,
+                        shouldTint(mTemplateData.getSupplementalLineItem()));
             }
         }
     }

@@ -99,14 +99,47 @@ public final class BcSmartspaceCardLoggingInfo {
             return false;
         }
         BcSmartspaceCardLoggingInfo other = (BcSmartspaceCardLoggingInfo) obj;
-        return mInstanceId == other.mInstanceId && mDisplaySurface == other.mDisplaySurface && mRank == other.mRank && mCardinality == other.mCardinality && mFeatureType == other.mFeatureType && mReceivedLatency == other.mReceivedLatency && mUid == other.mUid && Objects.equals(mSubcardInfo, other.mSubcardInfo) && Objects.equals(mDimensionalInfo, other.mDimensionalInfo);
+        return mInstanceId == other.mInstanceId
+                && mDisplaySurface == other.mDisplaySurface
+                && mRank == other.mRank
+                && mCardinality == other.mCardinality
+                && mFeatureType == other.mFeatureType
+                && mReceivedLatency == other.mReceivedLatency
+                && mUid == other.mUid
+                && Objects.equals(mSubcardInfo, other.mSubcardInfo)
+                && mDimensionalInfo == other.mDimensionalInfo;
     }
 
     public final int hashCode() {
-        return Objects.hash(mInstanceId, mDisplaySurface, mRank, mCardinality, mFeatureType, mReceivedLatency, mUid, mSubcardInfo);
+        return Objects.hash(
+                mInstanceId,
+                mDisplaySurface,
+                mRank,
+                mCardinality,
+                mFeatureType,
+                mReceivedLatency,
+                mUid,
+                mSubcardInfo);
     }
 
     public final String toString() {
-        return "instance_id = " + mInstanceId + ", feature type = " + mFeatureType + ", display surface = " + mDisplaySurface + ", rank = " + mRank + ", cardinality = " + mCardinality + ", receivedLatencyMillis = " + mReceivedLatency + ", uid = " + mUid + ", subcardInfo = " + mSubcardInfo + ", dimensionalInfo = " + mDimensionalInfo;
+        return "instance_id = "
+                + mInstanceId
+                + ", feature type = "
+                + mFeatureType
+                + ", display surface = "
+                + mDisplaySurface
+                + ", rank = "
+                + mRank
+                + ", cardinality = "
+                + mCardinality
+                + ", receivedLatencyMillis = "
+                + mReceivedLatency
+                + ", uid = "
+                + mUid
+                + ", subcardInfo = "
+                + mSubcardInfo
+                + ", dimensionalInfo = "
+                + mDimensionalInfo;
     }
 }
