@@ -171,6 +171,7 @@
 
     <style name="TextAppearance.QS.Status">
         <item name="android:fontFamily">variable-body-medium-emphasized</item>
+        <item name="android:textFontWeight">500</item>
         <item name="android:textColor">@color/shade_header_text_color</item>
         <item name="android:textSize">@dimen/status_bar_shade_header_text_size_sp</item>
         <item name="android:letterSpacing">0.01</item>
