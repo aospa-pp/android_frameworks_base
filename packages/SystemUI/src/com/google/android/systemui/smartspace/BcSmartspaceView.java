@@ -793,15 +793,9 @@ public class BcSmartspaceView extends FrameLayout
         }
     }
 
-    public final void setSelectedDot(float f, int i) {
-        if (mPagerDots != null && i > 0 && i <= mPagerDots.numPages) {
-            mPagerDots.currentPositionIndex = i;
-            mPagerDots.currentPositionOffset = f;
-            mPagerDots.invalidate();
-            if (f >= 0.5d) {
-                i++;
-            }
-            mPagerDots.updateCurrentPageIndex(i);
+    public final void setSelectedDot(float offset, int position) {
+        if (mPagerDots != null) {
+            mPagerDots.setPageOffset(offset, position);
         }
     }
 
