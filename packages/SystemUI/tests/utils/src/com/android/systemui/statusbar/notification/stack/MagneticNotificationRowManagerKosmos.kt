@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.notification.stack
 
 import com.android.systemui.dump.dumpManager
 import com.android.systemui.haptics.msdl.msdlPlayer
+import com.android.systemui.haptics.vibratorHelper
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.statusbar.notification.row.NotificationRowLogger
 import com.android.systemui.statusbar.phone.notificationTargetsHelper
@@ -35,5 +36,6 @@ val Kosmos.magneticNotificationRowManagerImpl by
             NotificationRoundnessManager(dumpManager),
             mock<NotificationRowLogger>(),
             systemClock,
+            vibratorHelper,
         )
     }

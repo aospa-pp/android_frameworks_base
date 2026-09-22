@@ -17,8 +17,10 @@
 package com.android.systemui.statusbar.notification.stack
 
 import android.os.VibrationAttributes
+import android.os.VibrationEffect
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.notification.Roundable
 import com.android.systemui.statusbar.notification.TopBottomRoundness
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
@@ -43,6 +45,7 @@ constructor(
     private val notificationRoundnessManager: NotificationRoundnessManager,
     private val logger: NotificationRowLogger,
     private val systemClock: SystemClock,
+    private val vibratorHelper: VibratorHelper? = null,
 ) : MagneticNotificationRowManager {
 
     var currentState = State.IDLE
@@ -91,6 +94,10 @@ constructor(
     // Last time pulling haptics played, in milliseconds since boot
     // (see SystemClock.elapsedRealtime)
     private var lastVibrationTime = 0L
+    private var lastVibrationProgress = 0f
+
+    private val textureTickEffect =
+        VibrationEffect.createPredefined(VibrationEffect.EFFECT_TEXTURE_TICK)
 
     private val detachedRoundnessSet =
         List(ROUNDNESS_MULTIPLIERS.size) { index ->
@@ -125,6 +132,8 @@ constructor(
     ) {
         if (currentState == State.IDLE) {
             detachDirectionEstimator.reset()
+            lastVibrationTime = 0L
+            lastVibrationProgress = 0f
             updateMagneticAndRoundableTargets(swipingRow, stackScrollLayout, sectionsManager)
             currentState = State.TARGETS_SET
         } else {
@@ -252,24 +261,32 @@ constructor(
     private fun playPullHaptics(mappedTranslation: Float, canSwipedBeDismissed: Boolean) {
         val currentTime = systemClock.elapsedRealtime()
         if ((currentTime - lastVibrationTime) < VIBRATION_TIME_THRESHOLD) return
-        lastVibrationTime = currentTime
         val normalizedTranslation = abs(mappedTranslation) / magneticDetachThreshold
-        val scaleFactor =
-            if (canSwipedBeDismissed) {
-                WEAK_VIBRATION_SCALE
-            } else {
-                STRONG_VIBRATION_SCALE
-            }
-        val vibrationScale = scaleFactor * normalizedTranslation.pow(VIBRATION_SCALE_EXPONENT)
-        val compensatedScale =
-            vibrationScale.pow(VIBRATION_PERCEPTION_EXPONENT).coerceAtMost(maximumValue = 1f)
-        msdlPlayer.playToken(
-            MSDLToken.DRAG_INDICATOR_CONTINUOUS,
-            InteractionProperties.DynamicVibrationScale(
-                scale = compensatedScale,
-                vibrationAttributes = VIBRATION_ATTRIBUTES_PIPELINING,
-            ),
-        )
+        if (abs(normalizedTranslation - lastVibrationProgress) < VIBRATION_PROGRESS_THRESHOLD) return
+
+        lastVibrationTime = currentTime
+        lastVibrationProgress = normalizedTranslation
+
+        if (vibratorHelper != null) {
+            vibratorHelper.vibrate(textureTickEffect, VIBRATION_ATTRIBUTES_PIPELINING)
+        } else {
+            val scaleFactor =
+                if (canSwipedBeDismissed) {
+                    WEAK_VIBRATION_SCALE
+                } else {
+                    STRONG_VIBRATION_SCALE
+                }
+            val vibrationScale = scaleFactor * normalizedTranslation.pow(VIBRATION_SCALE_EXPONENT)
+            val compensatedScale =
+                vibrationScale.pow(VIBRATION_PERCEPTION_EXPONENT).coerceAtMost(maximumValue = 1f)
+            msdlPlayer.playToken(
+                MSDLToken.DRAG_INDICATOR_CONTINUOUS,
+                InteractionProperties.DynamicVibrationScale(
+                    scale = compensatedScale,
+                    vibrationAttributes = VIBRATION_ATTRIBUTES_PIPELINING,
+                ),
+            )
+        }
     }
 
     private fun playThresholdHaptics() = msdlPlayer.playToken(MSDLToken.SWIPE_THRESHOLD_INDICATOR)
@@ -374,6 +391,8 @@ constructor(
                 }
                 else -> {}
             }
+            lastVibrationTime = 0L
+            lastVibrationProgress = 0f
         } else {
             // A magnetic neighbor may be dismissing. In this case, we need to cancel any snap back
             // magnetic animation to let the external dismiss animation proceed.
@@ -410,6 +429,8 @@ constructor(
 
     override fun reset() {
         detachDirectionEstimator.reset()
+        lastVibrationTime = 0L
+        lastVibrationProgress = 0f
         currentMagneticListeners.forEach {
             it?.cancelMagneticAnimations()
             it?.cancelTranslationAnimations()
@@ -567,7 +588,9 @@ constructor(
         // Exponent applied to a vibration scale to compensate for human vibration perception
         private const val VIBRATION_PERCEPTION_EXPONENT = 1 / 0.89f
         // How much time we wait (in milliseconds) before we play a new pulling vibration
-        private const val VIBRATION_TIME_THRESHOLD = 60
+        private const val VIBRATION_TIME_THRESHOLD = 20
+        // Progress threshold beyond which a new drag texture is delivered
+        private const val VIBRATION_PROGRESS_THRESHOLD = 0.035f
         // The number of LOW_TICK primitives in a pulling vibration
         private const val N_LOW_TICKS = 5
     }
