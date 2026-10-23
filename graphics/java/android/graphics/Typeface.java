@@ -228,15 +228,46 @@ public class Typeface {
 
     /** @hide */
     public long getNativeInstance() {
-        if (mPendingTypeface != null) {
-            Typeface pendingTypeface = mPendingTypeface.get();
-            if (pendingTypeface == null) {
-                throw new IllegalStateException("The Typeface is not fully initialized.");
-            }
-            return pendingTypeface.getNativeInstance();
-        } else {
+        if (mPendingTypeface == null) {
             return native_instance;
         }
+        Typeface current = this;
+        // A pending chain is one or two links deep. The bound turns a malformed cycle
+        // into a clear failure instead of unbounded recursion (StackOverflowError).
+        for (int i = 0; i < 32; i++) {
+            Typeface next = current.mPendingTypeface.get();
+            if (next == null) {
+                throw new IllegalStateException("The Typeface is not fully initialized.");
+            }
+            if (next == current) {
+                throw new IllegalStateException(
+                        "The pending Typeface chain is cyclic: " + mSystemFontFamilyName);
+            }
+            if (next.mPendingTypeface == null) {
+                return next.native_instance;
+            }
+            current = next;
+        }
+        throw new IllegalStateException("The pending Typeface chain is too deep or cyclic: "
+                + mSystemFontFamilyName);
+    }
+
+    /** Resolves lazy Typeface aliases before a resolved Typeface is used as a new target. */
+    private @Nullable Typeface resolvePendingTypeface() {
+        Typeface current = this;
+        // Pending aliases are normally one or two links deep. The bound protects against
+        // malformed cycles without allocating a set.
+        for (int i = 0; i < 32; i++) {
+            if (current.mPendingTypeface == null) {
+                return current;
+            }
+            Typeface next = current.mPendingTypeface.get();
+            if (next == null || next == current) {
+                return null;
+            }
+            current = next;
+        }
+        return null;
     }
 
     private final @Nullable Typeface mDerivedFrom;
@@ -280,7 +311,12 @@ public class Typeface {
                     + " is not a placeholder Typeface, cannot repoint in place.");
             return false;
         }
-        mPendingTypeface.set(resolvedTypeface);
+        Typeface concreteTypeface = resolvedTypeface.resolvePendingTypeface();
+        if (concreteTypeface == null) {
+            Log.w(TAG, "updatePendingTypeface: refusing unresolved or cyclic Typeface target.");
+            return false;
+        }
+        mPendingTypeface.set(concreteTypeface);
         return true;
     }
 
@@ -1407,7 +1443,8 @@ public class Typeface {
     }
 
     /**
-     * Returns the system typeface registered under the given name, or null if there is none.
+     * Returns the resolved system typeface registered under the given name, or null if the family
+     * is missing or its lazy initialization is incomplete.
      * Unlike {@link #getSystemDefaultTypeface(String)} this never substitutes
      * {@link #DEFAULT}, so a caller can tell a missing family from the default font.
      *
@@ -1415,7 +1452,8 @@ public class Typeface {
      */
     @Nullable
     public static Typeface getSystemTypeface(@NonNull String familyName) {
-        return sSystemFontMap.get(familyName);
+        Typeface typeface = sSystemFontMap.get(familyName);
+        return typeface == null ? null : typeface.resolvePendingTypeface();
     }
 
     /** @hide */
@@ -1675,6 +1713,11 @@ public class Typeface {
         // sSystemFontMap by their list name, falling back through known
         // aliases to Typeface.DEFAULT.
         Typeface tf = FontController.resolveBaseTypeface();
+        tf = tf == null ? null : tf.resolvePendingTypeface();
+        if (tf == null) {
+            Log.w(TAG, "changeFont: base Typeface is not initialized; skipping font update.");
+            return;
+        }
 
         Typeface tfBold = create(tf, BOLD);
         Typeface tfItalic = create(tf, ITALIC);

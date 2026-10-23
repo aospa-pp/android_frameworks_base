@@ -214,8 +214,8 @@ public class FontController {
         }
         // Fall back through known default font aliases
         for (String family : DEFAULT_FONT_FALLBACKS) {
-            Typeface tf = Typeface.getSystemDefaultTypeface(family);
-            if (tf != null && tf != Typeface.DEFAULT) {
+            Typeface tf = Typeface.getSystemTypeface(family);
+            if (tf != null) {
                 logger("resolveDefaultTypeface: resolved via fallback '" + family + "'");
                 return tf;
             }
