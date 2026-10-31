@@ -389,7 +389,17 @@ public class SenseProvider implements ServiceProvider {
     }
 
     public SenseProvider(Context context, BiometricStateCallback biometricStateCallback, FaceSensorPropertiesInternal sensorProps, LockoutResetDispatcher lockoutResetDispatcher) {
-        this(context, biometricStateCallback, sensorProps, lockoutResetDispatcher, new BiometricScheduler<>(0, null));
+        // The A17 scheduler requires a current user retriever; it cannot be an
+        // instance field reference in this constructor chain, so read the
+        // current user from ActivityManager. User switches are additionally
+        // handled by this provider's own user switch observer, so no
+        // UserSwitchProvider is supplied to the scheduler.
+        this(context, biometricStateCallback, sensorProps, lockoutResetDispatcher,
+                new BiometricScheduler<>(new Handler(Looper.getMainLooper()),
+                        BiometricScheduler.SENSOR_TYPE_FACE,
+                        null /* gestureAvailabilityDispatcher */,
+                        () -> ActivityManager.getCurrentUser(),
+                        null /* userSwitchProvider */));
     }
 
     private synchronized ISenseService getDaemon() {
@@ -779,7 +789,7 @@ public class SenseProvider implements ServiceProvider {
             final int faceId = faces.get(0).getBiometricId();
             final FaceSetFeatureClient client = new FaceSetFeatureClient(mContext,
                     mLazyDaemon, token, new ClientMonitorCallbackConverter(receiver), userId,
-                    opPackageName, mSensorId, BiometricLogger.ofUnknown(mContext),
+                    opPackageName, mSensorId, BiometricLogger.ofUnknown(mContext, mHandler),
                     mBiometricContext,
                     feature, enabled, hardwareAuthToken, faceId);
             mScheduler.scheduleClientMonitor(client, mBiometricStateCallback);
@@ -814,7 +824,7 @@ public class SenseProvider implements ServiceProvider {
             final int faceId = faces.get(0).getBiometricId();
             final FaceGetFeatureClient client = new FaceGetFeatureClient(mContext, mLazyDaemon,
                     token, listener, userId, opPackageName, mSensorId,
-                    BiometricLogger.ofUnknown(mContext), mBiometricContext,
+                    BiometricLogger.ofUnknown(mContext, mHandler), mBiometricContext,
                     feature, faceId);
             mScheduler.scheduleClientMonitor(client, new ClientMonitorCallback() {
                 @Override
@@ -1090,7 +1100,7 @@ public class SenseProvider implements ServiceProvider {
     }
 
     private BiometricLogger createLogger(int statsAction, int statsClient) {
-        return new BiometricLogger(mContext, BiometricsProtoEnums.MODALITY_FACE,
+        return new BiometricLogger(mContext, mHandler, BiometricsProtoEnums.MODALITY_FACE,
                 statsAction, statsClient, mAuthenticationStatsCollector);
     }
 
