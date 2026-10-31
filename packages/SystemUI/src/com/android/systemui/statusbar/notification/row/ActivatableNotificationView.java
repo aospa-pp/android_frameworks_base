@@ -347,7 +347,13 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     protected void setBackgroundTintColor(int color) {
         if (color != mCurrentBackgroundTint) {
             mCurrentBackgroundTint = color;
-            if (notificationBackgroundTintOptimization() && color == mNormalColor) {
+            // The skip-the-tint optimization relies on a 0 tint leaving the drawable at its
+            // default color, which only holds for the legacy SRC_ATOP tint path.  When row
+            // transparency is on, the normal color is a translucent surface effect color that
+            // must be explicitly applied, and setTint(0) would paint the row fully transparent
+            // instead, blending it into the shade.
+            if (notificationBackgroundTintOptimization() && !notificationRowTransparency()
+                    && color == mNormalColor) {
                 // We don't need to tint a normal notification
                 color = 0;
             }
