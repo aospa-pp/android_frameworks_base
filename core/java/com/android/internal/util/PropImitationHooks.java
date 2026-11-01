@@ -27,6 +27,7 @@ import android.util.Log;
 import com.android.internal.R;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.Set;
@@ -92,10 +93,20 @@ public class PropImitationHooks {
                 key = key.substring(8);
             }
             Field field = clazz.getDeclaredField(key);
-            field.setAccessible(true);
+            // Android 17's ART refuses Field.set on final fields even with
+            // setAccessible, so write through Unsafe instead.  Field.getOffset()
+            // exists at runtime but is not exposed to the framework API
+            // surface, hence the reflection.  For a static field the declaring
+            // class doubles as the base object.
+            Method getOffset = Field.class.getDeclaredMethod("getOffset");
+            long offset = (int) getOffset.invoke(field);
+            sun.misc.Unsafe unsafe = sun.misc.Unsafe.getUnsafe();
             // Cast the value to int if it's an integer field, otherwise string.
-            field.set(null, field.getType().equals(Integer.TYPE) ? Integer.parseInt(value) : value);
-            field.setAccessible(false);
+            if (field.getType().equals(Integer.TYPE)) {
+                unsafe.putInt(field.getDeclaringClass(), offset, Integer.parseInt(value));
+            } else {
+                unsafe.putObject(field.getDeclaringClass(), offset, value);
+            }
         } catch (Exception e) {
             Log.e(TAG, "Failed to set prop " + key, e);
         }
