@@ -374,6 +374,10 @@ constructor(
             shadeCarrierGroupControllerBuilder.setShadeCarrierGroup(mShadeCarrierGroup).build()
 
         privacyIconsController.onParentVisible()
+
+        // Push the header colors now, instead of waiting for the first theme change, so that the
+        // carrier signal icons are tinted from the start.
+        updateColors()
     }
 
     private fun getBgColor() =

@@ -46,6 +46,13 @@ public class ShadeCarrier extends LinearLayout {
     private ImageView mMobileRoaming;
     private ModernShadeCarrierGroupMobileView mModernMobileView;
     private View mSpacer;
+
+    // Last tint requested by the shade header. The modern mobile view is created lazily when the
+    // first mobile icon state arrives, which can happen after the header has already pushed its
+    // colors, so remember them and apply them when the view shows up.
+    private int mStyleResId = 0;
+    private int mFgColor = 0;
+    private int mBgColor = 0;
     @Nullable
     private CellSignalState mLastSignalState;
     private boolean mMobileSignalInitialized = false;
@@ -93,6 +100,9 @@ public class ShadeCarrier extends LinearLayout {
         mSpacer.setVisibility(View.GONE);
         mCarrierText.setVisibility(View.GONE);
         addView(mobileView);
+        if (mStyleResId != 0) {
+            mobileView.setStyleAndTint(mStyleResId, mFgColor, mBgColor);
+        }
     }
 
     /**
@@ -163,6 +173,9 @@ public class ShadeCarrier extends LinearLayout {
     /** Update the text appearance of the text and the tint of the icon */
     public void updateTextAppearanceAndTint(@StyleRes int resId, int fgColor, int bgColor) {
         mCarrierText.setTextAppearance(resId);
+        mStyleResId = resId;
+        mFgColor = fgColor;
+        mBgColor = bgColor;
         if (mModernMobileView != null) {
             mModernMobileView.setStyleAndTint(resId, fgColor, bgColor);
         }
