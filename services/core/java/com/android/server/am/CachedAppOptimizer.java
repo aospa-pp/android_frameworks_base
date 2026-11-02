@@ -1532,6 +1532,22 @@ public class CachedAppOptimizer {
             return;
         }
 
+        // Don't freeze apps that have shown UI.  Apps are not prepared for being frozen and
+        // end up killed for failing to freeze their binder interface while they receive
+        // transactions in the cached state, and the apps in the user's active rotation are
+        // exactly the ones that hit this.  Keep them unfrozen and responsive instead;
+        // processes that have not shown UI (the long tail) are still frozen as usual, so
+        // the freezer keeps covering where its savings actually come from.  An explicit
+        // force, used by tests and shell diagnostics, overrides the exemption.
+        if (app.getHasShownUi() && !force) {
+            if (DEBUG_FREEZER) {
+                Slog.d(TAG_AM,
+                        "Skip freezing because app has shown UI pid=" + app.getPid() + " "
+                                + app.processName);
+            }
+            return;
+        }
+
         if (app.getSetAdj() >= CACHED_APP_MIN_ADJ) {
             final IApplicationThread thread = app.getThread();
             if (thread != null) {
