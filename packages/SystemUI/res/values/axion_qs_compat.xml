@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright 2025-2026 AxionOS
+  Copyright 2026 The AOSPA Project
+  SPDX-License-Identifier: Apache-2.0
+-->
+<resources>
+    <!-- Resources used by the AxionOS Quick Settings port. -->
+    <color name="ax_qqs_drag_handle">#6B6B6B</color>
+    <dimen name="ax_qs_offset_reduction">10dp</dimen>
+    <dimen name="ax_qs_top_padding">24dp</dimen>
+    <string name="ax_dynamic_bar_media_output">Media output</string>
+
+    <!-- Media waveform used by the Axion in-grid media player. -->
+    <string name="config_qs_waveform_path" translatable="false"></string>
+    <integer-array name="config_qs_waveform_lut" />
+    <dimen name="config_qs_waveform_height">16dp</dimen>
+    <dimen name="config_qs_waveform_length">80dp</dimen>
+    <integer name="config_qs_waveform_layers">1</integer>
+    <integer name="config_qs_waveform_fill_alpha">0</integer>
+
+    <string name="quick_settings_brightness_unable_adjust_msg">Can\'t adjust brightness because it\'s being controlled by the top app</string>
+
+    <!-- Axion QS uses the display cutout to pad the panel top on notched devices. -->
+    <bool name="config_shouldUseDisplayCutOutPadding" translatable="false">true</bool>
+</resources>

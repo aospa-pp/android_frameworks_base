@@ -76,6 +76,7 @@ import androidx.compose.ui.text.font.Font
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.LayoutDirection
@@ -84,6 +85,7 @@ import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.max
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.android.internal.policy.SystemBarUtils
 import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexContentPicker
@@ -159,6 +161,14 @@ object ShadeHeader {
         val ExpandedHeight = 120.dp
         val ChipPaddingHorizontal = 6.dp
         val ChipPaddingVertical = 4.dp
+
+        val StatusBarHeight: Dp
+            @Composable
+            get() {
+                return with(LocalDensity.current) {
+                    SystemBarUtils.getStatusBarHeight(LocalContext.current).toDp()
+                }
+            }
     }
 
     object Colors {
@@ -176,6 +186,7 @@ object ShadeHeader {
     object TestTags {
         const val Root = "shade_header_root"
         const val BatteryTestTag = "battery_meter_composable_view"
+        const val BatteryTestTagLegacy = "battery_percentage_view"
     }
 }
 

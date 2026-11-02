@@ -570,6 +570,8 @@ object QuickSettingsShade {
             @ReadOnlyComposable
             get() = dimensionResource(id = R.dimen.overlay_qs_layout_toolbar_height)
 
+        val Padding = 16.dp
+
         // This is used around the header and toolbar
         val ShortPadding = 8.dp
 

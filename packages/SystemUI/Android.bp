@@ -424,6 +424,7 @@ android_library {
         "androidx.slice_slice-view",
         "dynamiccolors",
         "AccessibilityFloatingMenu-res",
+        "ax_systemui_res",
     ],
     manifest: "AndroidManifest-res.xml",
     flags_packages: [
@@ -479,6 +480,7 @@ android_library {
         "src/**/*.kt",
         "src/**/*.java",
         "src/**/I*.aidl",
+        ":ax_systemui_sources",
         "compose/features/src/**/*.kt",
         "compose/facade/enabled/src/**/*.kt",
     ] + select(product_variable("debuggable"), {
@@ -490,6 +492,8 @@ android_library {
         "//frameworks/libs/systemui:compilelib",
         "com.android.systemui.bundle.phone_api",
         "SystemUI-res",
+        "ax_compose",
+        "ax_systemui_res",
         "WifiTrackerLib",
         "WindowManager-Shell",
         "PlatformAnimationLib",

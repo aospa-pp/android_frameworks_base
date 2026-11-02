@@ -143,7 +143,7 @@ import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
-import com.android.systemui.qs.composefragment.QSFragmentCompose;
+import com.android.systemui.qs.ax.fragment.AxQsFragmentCompose;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
@@ -1183,7 +1183,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     protected QS createDefaultQSFragment() {
         return mFragmentService
                 .getFragmentHostManager(getNotificationShadeWindowView())
-                .create(QSFragmentCompose.class);
+                .create(AxQsFragmentCompose.class);
     }
 
     private void setUpPresenter() {

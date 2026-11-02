@@ -435,6 +435,12 @@ object CommonTileDefaults {
         @ReadOnlyComposable
         get() = dimensionResource(id = R.dimen.common_tile_default_inactive_tile_corner_radius)
 
+    /** Compatibility alias used by the Axion QS port. */
+    val InactiveCornerRadius: Dp
+        @Composable
+        @ReadOnlyComposable
+        get() = InactiveTileCornerRadius
+
     /** Dimensions for focus rings with wide corners */
     val TileDetailsEntryWideCornerRadius: Dp
         @Composable
@@ -486,6 +492,7 @@ object CommonTileDefaults {
 
     val SideIconWidth = 32.dp
     val SideIconHeight = 20.dp
+    val TileStartPadding = 12.dp
     val ChevronSize = 14.dp
     val TileEndPadding = 12.dp
     val TileArrangementPadding = 6.dp

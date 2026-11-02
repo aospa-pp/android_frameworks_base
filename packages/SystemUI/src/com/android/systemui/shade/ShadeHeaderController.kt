@@ -219,6 +219,16 @@ constructor(
             onHeaderStateChanged()
         }
 
+    private var composeOverlayHeaderActive = false
+
+    /** Hides the legacy header while the Compose QS owns the header. */
+    fun setOverlayShadeHeaderActive(active: Boolean) {
+        if (composeOverlayHeaderActive != active) {
+            composeOverlayHeaderActive = active
+            updateVisibility()
+        }
+    }
+
     /** Expansion fraction of the QQS/QS shade. This is not the expansion between QQS <-> QS. */
     var shadeExpandedFraction = -1f
         set(value) {
@@ -562,7 +572,7 @@ constructor(
     }
 
     private fun onShadeExpandedChanged() {
-        if (qsVisible) {
+        if (qsVisible && !composeOverlayHeaderActive) {
             privacyIconsController.startListening()
         } else {
             privacyIconsController.stopListening()
@@ -582,6 +592,8 @@ constructor(
     private fun updateVisibility() {
         val visibility =
             if (qsDisabled) {
+                View.GONE
+            } else if (composeOverlayHeaderActive) {
                 View.GONE
             } else if (qsVisible && !customizing) {
                 View.VISIBLE
