@@ -79,6 +79,7 @@ import com.android.systemui.media.controls.domain.pipeline.MediaDataManager;
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QS;
+import com.android.systemui.qs.ax.domain.AxQsShadePolicy;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.screenrecord.ScreenRecordUxController;
@@ -167,6 +168,7 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
     private final SplitShadeStateController mSplitShadeStateController;
     private final Lazy<InteractionJankMonitor> mInteractionJankMonitorLazy;
     private final ShadeRepository mShadeRepository;
+    private final AxQsShadePolicy mAxQsShadePolicy;
     private final ShadeInteractor mShadeInteractor;
     private final ActiveNotificationsInteractor mActiveNotificationsInteractor;
     private final Lazy<CommunalTransitionViewModel> mCommunalTransitionViewModelLazy;
@@ -361,7 +363,8 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
             SplitShadeStateController splitShadeStateController,
             Lazy<CommunalTransitionViewModel> communalTransitionViewModelLazy,
             Lazy<LargeScreenHeaderHelper> largeScreenHeaderHelperLazy,
-            WindowManagerProvider windowManagerProvider
+            WindowManagerProvider windowManagerProvider,
+            AxQsShadePolicy axQsShadePolicy
     ) {
         mDisplaySubcomponentRepository = displaySubcomponentRepository;
         mShadeDisplaysInteractorLazy = shadeDisplaysInteractorLazy;
@@ -411,6 +414,7 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         mActiveNotificationsInteractor = activeNotificationsInteractor;
         mCommunalTransitionViewModelLazy = communalTransitionViewModelLazy;
         mJavaAdapter = javaAdapter;
+        mAxQsShadePolicy = axQsShadePolicy;
 
         mLockscreenShadeTransitionController.addCallback(new LockscreenShadeTransitionCallback());
         dumpManager.registerDumpable(this);
@@ -612,7 +616,17 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
                         MotionEvent.BUTTON_SECONDARY) || event.isButtonPressed(
                         MotionEvent.BUTTON_TERTIARY));
 
-        return twoFingerDrag || stylusButtonClickDrag || mouseButtonClickDrag;
+        final boolean separateShade = mAxQsShadePolicy.isSeparateShade();
+        final float w = separateShade
+                ? mPanelView.getMeasuredWidth()
+                : (mQs != null ? mQs.getView().getMeasuredWidth()
+                        : mPanelView.getMeasuredWidth());
+        final float x = event.getX();
+        boolean showQsOverride = separateShade
+                && mAxQsShadePolicy.isSeparateQuickPanelGesture(x, w);
+        showQsOverride &= mBarState == StatusBarState.SHADE;
+
+        return twoFingerDrag || showQsOverride || stylusButtonClickDrag || mouseButtonClickDrag;
     }
 
     @Override
@@ -703,6 +717,9 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         if (!isExpansionEnabled() || mCollapsedOnDown || (keyguardShowing
                 && mKeyguardBypassController.getBypassEnabled() && !Flags.expandQsBypassEnabled())
                 || mSplitShadeEnabled) {
+            return false;
+        }
+        if (getExpanded() && yDiff < 0 && mAxQsShadePolicy.isSeparateShade()) {
             return false;
         }
         int headerTop, headerBottom;
@@ -1003,6 +1020,9 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         if (expandImmediate != isExpandImmediate()) {
             mShadeLog.logQsExpandImmediateChanged(expandImmediate);
             mShadeRepository.setLegacyExpandImmediate(expandImmediate);
+        }
+        if (!expandImmediate || mAxQsShadePolicy.isSeparateShade()) {
+            mNotificationStackScrollLayoutController.setQuickQsHidden(expandImmediate);
         }
     }
 
@@ -1613,6 +1633,9 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
     private void collapseOrExpandQs() {
         if (mSplitShadeEnabled) {
             return; // QS is always expanded in split shade
+        }
+        if (getExpanded() && mAxQsShadePolicy.collapseSeparateShade()) {
+            return;
         }
         onExpansionStarted();
         if (getExpanded()) {

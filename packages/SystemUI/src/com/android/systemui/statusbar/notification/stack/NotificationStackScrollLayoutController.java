@@ -60,6 +60,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.view.OneShotPreDrawListener;
 import com.android.systemui.Dumpable;
+import com.android.systemui.qs.ax.ui.panels.AxNotificationStackVisibility;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.classifier.Classifier;
@@ -169,6 +170,8 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     private final ConfigurationController mConfigurationController;
     private final MetricsLogger mMetricsLogger;
     private final ColorUpdateLogger mColorUpdateLogger;
+    private final AxNotificationStackVisibility mAxNotificationStackVisibility =
+            new AxNotificationStackVisibility();
 
     private final DumpManager mDumpManager;
     private final FalsingCollector mFalsingCollector;
@@ -1606,7 +1609,15 @@ public class NotificationStackScrollLayoutController implements Dumpable {
      * @param visible either the view is visible or not.
      */
     public void updateVisibility(boolean visible) {
-        mView.setVisibility(visible ? View.VISIBLE : View.INVISIBLE);
+        mAxNotificationStackVisibility.update(mView, visible);
+    }
+
+    public void setQuickQsHidden(boolean hidden) {
+        mAxNotificationStackVisibility.setQuickQsHidden(mView, hidden);
+    }
+
+    public void setSeparateShadeCollapsing(boolean collapsing) {
+        mAxNotificationStackVisibility.setSeparateShadeCollapsing(mView, collapsing);
     }
 
     public boolean isShowingEmptyShadeView() {
