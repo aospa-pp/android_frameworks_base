@@ -3774,6 +3774,63 @@ public final class NotificationPanelViewController implements
     /** Handles MotionEvents for the Shade. */
     public final class TouchHandler implements View.OnTouchListener, Gefingerpoken {
         private long mLastTouchDownTime = -1L;
+        private boolean mSeparatePageSwipeTracking;
+        private boolean mSeparatePageSwipeTriggered;
+        private float mSeparatePageSwipeDownX;
+        private float mSeparatePageSwipeDownY;
+
+        /**
+         * In separate panel mode the notification and QS pages live side by side. Horizontal
+         * swipes on the page background move between them without collapsing the shade.
+         */
+        private boolean handleSeparatePageSwipe(MotionEvent event) {
+            if (!mQsController.isSeparateShade() || mExpandedFraction < 1f) {
+                if (event.getActionMasked() == MotionEvent.ACTION_DOWN) {
+                    mSeparatePageSwipeTracking = false;
+                    mSeparatePageSwipeTriggered = false;
+                }
+                return mSeparatePageSwipeTriggered;
+            }
+            switch (event.getActionMasked()) {
+                case MotionEvent.ACTION_DOWN:
+                    mSeparatePageSwipeTriggered = false;
+                    mSeparatePageSwipeDownX = event.getX();
+                    mSeparatePageSwipeDownY = event.getY();
+                    // On the notification page keep notification swipe-away gestures intact and
+                    // only page-switch when the gesture does not start on a notification row.
+                    View child = mNotificationStackScrollLayoutController.getChildAtRawPosition(
+                            event.getX(), event.getY());
+                    mSeparatePageSwipeTracking = mQsController.getExpanded()
+                            || child == null
+                            || !(child instanceof ExpandableNotificationRow);
+                    break;
+                case MotionEvent.ACTION_MOVE:
+                    if (!mSeparatePageSwipeTracking || mSeparatePageSwipeTriggered) {
+                        break;
+                    }
+                    float dx = event.getX() - mSeparatePageSwipeDownX;
+                    float dy = event.getY() - mSeparatePageSwipeDownY;
+                    float slop = getTouchSlop(event) * 2f;
+                    if (Math.abs(dx) > slop && Math.abs(dx) > Math.abs(dy) * 1.5f) {
+                        if (!mQsController.getExpanded() && dx < 0) {
+                            mSeparatePageSwipeTriggered = true;
+                            expandToQs();
+                        } else if (mQsController.getExpanded() && dx > 0) {
+                            mSeparatePageSwipeTriggered = true;
+                            mQsController.collapseSeparateQsPage();
+                        }
+                    }
+                    break;
+                case MotionEvent.ACTION_UP:
+                case MotionEvent.ACTION_CANCEL:
+                    mSeparatePageSwipeTracking = false;
+                    mSeparatePageSwipeTriggered = false;
+                    break;
+                default:
+                    break;
+            }
+            return mSeparatePageSwipeTriggered;
+        }
 
         /**
          * With the shade and lockscreen being separated in the view hierarchy, touch handling now
@@ -3799,6 +3856,11 @@ public final class NotificationPanelViewController implements
                 return false;
             }
             initDownStates(event);
+            if (handleSeparatePageSwipe(event)) {
+                mShadeLog.logMotionEvent(event,
+                        "NPVC intercepted separate-mode horizontal page swipe");
+                return true;
+            }
             // Do not let touches go to shade or QS if the bouncer is visible,
             // but still let user swipe down to expand the panel, dismissing the bouncer.
             if (mCentralSurfaces.isBouncerShowing()) {
@@ -3966,6 +4028,19 @@ public final class NotificationPanelViewController implements
                 mShadeLog.d("onTouch: alternate bouncer visible; ignoring touch");
                 // never send touches to shade if the alternate bouncer is showing
                 return false;
+            }
+
+            if (mSeparatePageSwipeTriggered) {
+                if (event.getActionMasked() == MotionEvent.ACTION_UP
+                        || event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
+                    mSeparatePageSwipeTriggered = false;
+                }
+                return true;
+            }
+            if (handleSeparatePageSwipe(event)) {
+                mShadeLog.logMotionEvent(event,
+                        "NPVC handled separate-mode horizontal page swipe");
+                return true;
             }
 
             if (event.getAction() == MotionEvent.ACTION_DOWN) {
