@@ -56,4 +56,6 @@
 
     <!-- Indicates post recording flow to use flat bottom bar to save vertical space -->
     <bool name="screen_record_post_recording_flat_bottom_bar">true</bool>
+    <!-- Use split shade in phone landscape so the Axion split layout is consistent. -->
+    <bool name="config_use_split_notification_shade">true</bool>
 </resources>
