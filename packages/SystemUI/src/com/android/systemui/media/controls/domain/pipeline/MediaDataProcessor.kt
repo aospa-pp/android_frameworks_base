@@ -183,10 +183,6 @@ class MediaDataProcessor(
         }
 
     override fun start() {
-        if (!SceneContainerFlag.isEnabled && !MediaControlsInComposeFlag.isEnabled) {
-            return
-        }
-
         dumpManager.registerNormalDumpable(TAG, this)
 
         val suspendFilter = IntentFilter(Intent.ACTION_PACKAGES_SUSPENDED)

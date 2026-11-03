@@ -115,10 +115,6 @@ constructor(
         }
 
     override fun start() {
-        if (!SceneContainerFlag.isEnabled && !MediaControlsInComposeFlag.isEnabled) {
-            return
-        }
-
         // Initialize the internal processing pipeline. The listeners at the front of the pipeline
         // are set as internal listeners so that they receive events. From there, events are
         // propagated through the pipeline. The end of the pipeline is currently mediaDataFilter,
