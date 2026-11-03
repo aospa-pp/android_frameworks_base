@@ -26,7 +26,7 @@ object MediaControlsInComposeFlag {
 
     @JvmStatic
     inline val isEnabled: Boolean
-        get() = mediaControlsInCompose() || SceneContainerFlag.isEnabled
+        get() = true
 
     /**
      * Called to ensure code is only run when the flag is disabled. This will throw an exception if

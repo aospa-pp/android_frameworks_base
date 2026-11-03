@@ -719,6 +719,13 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
                 || mSplitShadeEnabled) {
             return false;
         }
+        if (mAxQsShadePolicy.isSeparateShade()) {
+            // In separate mode QS is opened from the status-bar edge, not by dragging
+            // down the notification page.
+            if (y > mStatusBarMinHeight) {
+                return false;
+            }
+        }
         if (getExpanded() && yDiff < 0 && mAxQsShadePolicy.isSeparateShade()) {
             return false;
         }
