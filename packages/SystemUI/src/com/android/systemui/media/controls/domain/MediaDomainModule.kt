@@ -57,11 +57,9 @@ interface MediaDomainModule {
             legacyProvider: Provider<LegacyMediaDataManagerImpl>,
             newProvider: Provider<MediaCarouselInteractor>,
         ): MediaDataManager {
-            return if (SceneContainerFlag.isEnabled || MediaControlsInComposeFlag.isEnabled) {
-                newProvider.get()
-            } else {
-                legacyProvider.get()
-            }
+            // Axion's QS media card is backed by the remedia pipeline, so always use
+            // the new MediaDataManager implementation on this ROM.
+            return newProvider.get()
         }
 
         @Provides
