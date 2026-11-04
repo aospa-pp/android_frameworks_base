@@ -3643,6 +3643,13 @@ public class SettingsProvider extends ContentProvider {
                 final long globalKey = makeKey(SETTINGS_TYPE_GLOBAL, UserHandle.USER_SYSTEM,
                         Context.DEVICE_ID_DEFAULT);
                 ensureSettingsStateLocked(globalKey);
+
+                // AOSPA: make sure the heads-up notifications toggle exists.
+                // Nothing seeds it on fresh installs and Android 17's SystemUI
+                // treats a missing setting as disabled, which would disable
+                // heads-up notifications out of the box.  Only set it when
+                // absent so an explicit user choice (off) is respected.
+                ensureGlobalSettingHeadsUpSetLocked(mSettingsStates.get(globalKey));
             }
 
             // Ensure secure settings loaded.
@@ -4155,6 +4162,19 @@ public class SettingsProvider extends ContentProvider {
             } finally {
                 cursor.close();
             }
+        }
+
+        private void ensureGlobalSettingHeadsUpSetLocked(SettingsState globalSettings) {
+            Setting value = globalSettings.getSettingLocked(
+                    Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED);
+
+            if (!value.isNull()) {
+                return;
+            }
+
+            globalSettings.insertSettingLocked(Settings.Global.HEADS_UP_NOTIFICATIONS_ENABLED,
+                    Integer.toString(Settings.Global.HEADS_UP_ON),
+                    null, true, SettingsState.SYSTEM_PACKAGE_NAME);
         }
 
         private void ensureSecureSettingAndroidIdSetLocked(SettingsState secureSettings) {
