@@ -129,6 +129,7 @@ import com.android.systemui.keyguard.KeyguardViewMediator;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.log.SessionTracker;
+import com.android.systemui.media.MediaArtController;
 import com.android.systemui.media.NotificationMediaManager;
 import com.android.systemui.navigationbar.NavigationBarController;
 import com.android.systemui.navigationbar.views.NavigationBarView;
@@ -491,6 +492,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     private final Lazy<NotificationPresenter> mPresenterLazy;
     private final Lazy<NotificationActivityStarter> mNotificationActivityStarterLazy;
     private final Lazy<NotificationShadeDepthController> mNotificationShadeDepthControllerLazy;
+    private final MediaArtController mMediaArtController;
     private final Optional<Bubbles> mBubblesOptional;
     private final Lazy<NoteTaskController> mNoteTaskControllerLazy;
     private final Optional<StartingSurface> mStartingSurfaceOptional;
@@ -591,6 +593,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             KeyguardIndicationController keyguardIndicationController,
             DemoModeController demoModeController,
             Lazy<NotificationShadeDepthController> notificationShadeDepthControllerLazy,
+            MediaArtController mediaArtController,
             ShadeTouchableRegionManager shadeTouchableRegionManager,
             ScreenOffAnimationController screenOffAnimationController,
             WallpaperController wallpaperController,
@@ -677,6 +680,7 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mDozeScrimController = dozeScrimController;
         mBiometricUnlockControllerLazy = biometricUnlockControllerLazy;
         mNotificationShadeDepthControllerLazy = notificationShadeDepthControllerLazy;
+        mMediaArtController = mediaArtController;
         mVolumeComponent = volumeComponent;
         mCommandQueue = commandQueue;
         mCommandQueueCallbacksLazy = commandQueueCallbacksLazy;
@@ -990,6 +994,8 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
             });
             mScrimController.attachViews(scrimBehind, notificationsScrim, scrimInFront);
         }
+
+        mMediaArtController.attach(getNotificationShadeWindowView());
 
         mLightRevealScrim.setScrimOpaqueChangedListener((opaque) -> {
             Runnable updateOpaqueness = () -> {
