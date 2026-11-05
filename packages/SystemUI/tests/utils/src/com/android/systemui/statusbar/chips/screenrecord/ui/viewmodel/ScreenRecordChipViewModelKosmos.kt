@@ -35,13 +35,8 @@ val Kosmos.screenRecordChipViewModel: ScreenRecordChipViewModel by
             scope = applicationCoroutineScope,
             interactor = screenRecordChipInteractor,
             shareToAppChipViewModel = shareToAppChipViewModel,
-            endMediaProjectionDialogHelper = endMediaProjectionDialogHelper,
-            dialogTransitionAnimator = mockDialogTransitionAnimator,
             systemClock = fakeSystemClock,
             logger = statusBarChipsLogger,
             uiEventLogger = statusBarChipsUiEventLogger,
-            screenCaptureUiInteractor = screenCaptureUiInteractor,
-            activityStarter = activityStarter,
-            screenCaptureRecordFeaturesInteractor = screenCaptureRecordFeaturesInteractor,
         )
     }

@@ -16,30 +16,19 @@
 
 package com.android.systemui.statusbar.chips.screenrecord.ui.viewmodel
 
-import android.app.ActivityManager
-import android.content.Context
 import androidx.annotation.DrawableRes
-import com.android.internal.jank.Cuj
-import com.android.systemui.animation.DialogCuj
-import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
-import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
-import com.android.systemui.screencapture.common.shared.model.ScreenCaptureUiParameters
-import com.android.systemui.screencapture.domain.interactor.ScreenCaptureUiInteractor
-import com.android.systemui.screencapture.record.domain.interactor.ScreenCaptureRecordFeaturesInteractor
 import com.android.systemui.screenrecord.data.model.ScreenRecordModel.Starting.Companion.toCountdownSeconds
 import com.android.systemui.statusbar.chips.StatusBarChipLogTags.pad
 import com.android.systemui.statusbar.chips.StatusBarChipsLog
-import com.android.systemui.statusbar.chips.mediaprojection.ui.view.EndMediaProjectionDialogHelper
 import com.android.systemui.statusbar.chips.screenrecord.domain.interactor.ScreenRecordChipInteractor
 import com.android.systemui.statusbar.chips.screenrecord.domain.model.ScreenRecordChipModel
-import com.android.systemui.statusbar.chips.screenrecord.ui.view.EndScreenRecordingDialogDelegate
 import com.android.systemui.statusbar.chips.sharetoapp.ui.viewmodel.ShareToAppChipViewModel
 import com.android.systemui.statusbar.chips.ui.model.Chronometer
 import com.android.systemui.statusbar.chips.ui.model.ColorsModel
@@ -47,7 +36,6 @@ import com.android.systemui.statusbar.chips.ui.model.EventTime
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.ChipTransitionHelper
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel
-import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel.Companion.createDialogLaunchOnClickCallback
 import com.android.systemui.statusbar.chips.uievents.StatusBarChipsUiEventLogger
 import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.util.time.SystemClock
@@ -67,13 +55,8 @@ constructor(
     private val interactor: ScreenRecordChipInteractor,
     private val shareToAppChipViewModel: ShareToAppChipViewModel,
     private val systemClock: SystemClock,
-    private val endMediaProjectionDialogHelper: EndMediaProjectionDialogHelper,
-    private val dialogTransitionAnimator: DialogTransitionAnimator,
     @StatusBarChipsLog private val logger: LogBuffer,
     private val uiEventLogger: StatusBarChipsUiEventLogger,
-    private val screenCaptureUiInteractor: ScreenCaptureUiInteractor,
-    private val activityStarter: ActivityStarter,
-    private val screenCaptureRecordFeaturesInteractor: ScreenCaptureRecordFeaturesInteractor,
 ) : OngoingActivityChipViewModel {
     private val instanceId = uiEventLogger.createNewInstanceId()
 
@@ -124,33 +107,11 @@ constructor(
     override val chip: StateFlow<OngoingActivityChipModel> =
         chipTransitionHelper.createChipFlow(chipWithConsistentTimer)
 
-    private fun createDelegate(
-        context: Context,
-        recordedTask: ActivityManager.RunningTaskInfo?,
-    ): EndScreenRecordingDialogDelegate {
-        return EndScreenRecordingDialogDelegate(
-            endMediaProjectionDialogHelper,
-            context,
-            stopAction = this::stopRecordingFromDialog,
-            recordedTask,
-        )
-    }
-
-    private fun stopRecordingFromDialog() {
-        logger.log(TAG, LogLevel.INFO, {}, { "Stop recording requested from dialog" })
+    private fun stopRecordingFromChip() {
+        logger.log(TAG, LogLevel.INFO, {}, { "Stop recording requested from chip" })
         chipTransitionHelper.onActivityStoppedFromDialog()
         shareToAppChipViewModel.onRecordingStoppedFromDialog()
         interactor.stopRecording()
-    }
-
-    private fun showScreenRecordingToolbar() {
-        activityStarter.executeRunnableDismissingKeyguard(
-            { screenCaptureUiInteractor.show(ScreenCaptureUiParameters.Record()) },
-            /* cancelAction= */ null,
-            /* dismissShade = */ true,
-            /* afterKeyguardGone= */ true,
-            /* deferred= */ false,
-        )
     }
 
     private fun ScreenRecordChipModel.Starting.toOngoingActivityChipModel():
@@ -192,25 +153,11 @@ constructor(
                     timeSource = systemClock,
                 ),
             colors = ColorsModel.Red,
+            // Stop the recording right away instead of asking for confirmation.
             clickBehavior =
-                OngoingActivityChipModel.ClickBehavior.ExpandAction(
-                    if (screenCaptureRecordFeaturesInteractor.shouldShowNewRecordingToolbar) {
-                        { showScreenRecordingToolbar() }
-                    } else {
-                        createDialogLaunchOnClickCallback(
-                            dialogDelegateCreator = { context ->
-                                createDelegate(context, recordedTask)
-                            },
-                            dialogTransitionAnimator = dialogTransitionAnimator,
-                            DIALOG_CUJ,
-                            key = KEY,
-                            instanceId = instanceId,
-                            uiEventLogger = uiEventLogger,
-                            logger = logger,
-                            tag = TAG,
-                        )
-                    }
-                ),
+                OngoingActivityChipModel.ClickBehavior.ExpandAction {
+                    stopRecordingFromChip()
+                },
             instanceId = instanceId,
         )
     }
@@ -218,8 +165,6 @@ constructor(
     companion object {
         const val KEY = "ScreenRecord"
         @DrawableRes val ICON = R.drawable.ic_screenrecord
-        private val DIALOG_CUJ =
-            DialogCuj(Cuj.CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP, tag = "Screen record")
         private val TAG = "ScreenRecordVM".pad()
     }
 }

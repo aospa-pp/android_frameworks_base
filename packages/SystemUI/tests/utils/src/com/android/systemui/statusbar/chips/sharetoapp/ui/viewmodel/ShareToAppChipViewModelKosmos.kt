@@ -23,6 +23,7 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.mediaProjectionChipInteractor
 import com.android.systemui.statusbar.chips.mediaprojection.ui.view.endMediaProjectionDialogHelper
+import com.android.systemui.statusbar.chips.screenrecord.domain.interactor.screenRecordChipInteractor
 import com.android.systemui.statusbar.chips.statusBarChipsLogger
 import com.android.systemui.statusbar.chips.uievents.statusBarChipsUiEventLogger
 import com.android.systemui.util.time.fakeSystemClock
@@ -36,6 +37,7 @@ val Kosmos.shareToAppChipViewModel: ShareToAppChipViewModel by
                 systemClock = fakeSystemClock,
                 endMediaProjectionDialogHelper = endMediaProjectionDialogHelper,
                 dialogTransitionAnimator = mockDialogTransitionAnimator,
+                screenRecordChipInteractor = screenRecordChipInteractor,
                 logger = statusBarChipsLogger,
                 uiEventLogger = statusBarChipsUiEventLogger,
             )

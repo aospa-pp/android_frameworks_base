@@ -35,6 +35,7 @@ import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.Me
 import com.android.systemui.statusbar.chips.mediaprojection.domain.model.MediaProjectionStopDialogModel
 import com.android.systemui.statusbar.chips.mediaprojection.domain.model.ProjectionChipModel
 import com.android.systemui.statusbar.chips.mediaprojection.ui.view.EndMediaProjectionDialogHelper
+import com.android.systemui.statusbar.chips.screenrecord.domain.interactor.ScreenRecordChipInteractor
 import com.android.systemui.statusbar.chips.sharetoapp.ui.view.EndGenericShareToAppDialogDelegate
 import com.android.systemui.statusbar.chips.sharetoapp.ui.view.EndShareScreenToAppDialogDelegate
 import com.android.systemui.statusbar.chips.ui.model.Chronometer
@@ -72,6 +73,7 @@ constructor(
     private val systemClock: SystemClock,
     private val endMediaProjectionDialogHelper: EndMediaProjectionDialogHelper,
     private val dialogTransitionAnimator: DialogTransitionAnimator,
+    private val screenRecordChipInteractor: ScreenRecordChipInteractor,
     @StatusBarChipsLog private val logger: LogBuffer,
     private val uiEventLogger: StatusBarChipsUiEventLogger,
 ) : OngoingActivityChipViewModel, CoreStartable {
@@ -214,6 +216,12 @@ constructor(
         mediaProjectionChipInteractor.stopProjecting()
     }
 
+    private fun stopScreenRecordingFromChip() {
+        logger.log(TAG, LogLevel.INFO, {}, { "Stop recording requested from chip" })
+        chipTransitionHelper.onActivityStoppedFromDialog()
+        screenRecordChipInteractor.stopRecording()
+    }
+
     private fun createShareScreenToAppStopDialog(
         projectionModel: ProjectionChipModel.Projecting
     ): MediaProjectionStopDialogModel {
@@ -260,7 +268,11 @@ constructor(
             colors = ColorsModel.Red,
             clickBehavior =
                 OngoingActivityChipModel.ClickBehavior.ExpandAction(
-                    onClick =
+                    if (state.projectionState.hostPackage == context.packageName) {
+                        // This projection is a screen recording: stop it right away instead of
+                        // asking for confirmation.
+                        { stopScreenRecordingFromChip() }
+                    } else {
                         createDialogLaunchOnClickCallback(
                             { context -> createShareScreenToAppDialogDelegate(context, state) },
                             dialogTransitionAnimator,
@@ -271,6 +283,7 @@ constructor(
                             logger = logger,
                             tag = TAG,
                         )
+                    }
                 ),
             managingPackageName = state.projectionState.hostPackage,
             instanceId = instanceId,
