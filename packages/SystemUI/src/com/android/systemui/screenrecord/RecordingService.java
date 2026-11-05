@@ -43,6 +43,8 @@ import android.view.Display;
 import android.widget.Toast;
 
 import com.android.internal.annotations.VisibleForTesting;
+import android.service.notification.StatusBarNotification;
+
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.dagger.qualifiers.LongRunning;
 import com.android.systemui.dagger.qualifiers.Main;
@@ -92,6 +94,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
     protected static final String ACTION_STOP_NOTIF =
             "com.android.systemui.screenrecord.STOP_FROM_NOTIF";
     protected static final String ACTION_SHARE = "com.android.systemui.screenrecord.SHARE";
+    protected static final String ACTION_DELETE = "com.android.systemui.screenrecord.DELETE";
     private static final String PERMISSION_SELF = "com.android.systemui.permission.SELF";
     protected static final String EXTRA_NOTIFICATION_ID = "notification_id";
 
@@ -269,6 +272,25 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
                 // Close quick shade
                 closeSystemDialogs();
                 break;
+            case ACTION_DELETE: {
+                Uri deleteUri = intent.getData();
+                if (deleteUri == null) {
+                    break;
+                }
+                int deleteNotificationId =
+                        intent.getIntExtra(EXTRA_NOTIFICATION_ID, mNotificationId);
+                mLongExecutor.execute(() -> {
+                    try {
+                        getContentResolver().delete(deleteUri, null, null);
+                    } catch (Throwable throwable) {
+                        Log.w(getTag(), "Failed to delete recording " + deleteUri, throwable);
+                    }
+                    // Remove notification
+                    mNotificationManager.cancelAsUser(null, deleteNotificationId, currentUser);
+                    maybeDismissSavedGroup(currentUser, deleteNotificationId);
+                });
+                break;
+            }
         }
         return Service.START_STICKY;
     }
@@ -435,6 +457,16 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
                         PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE))
                 .build();
 
+        Notification.Action deleteAction = new Notification.Action.Builder(
+                Icon.createWithResource(this, R.drawable.ic_screenrecord),
+                strings().getDeleteLabel(),
+                PendingIntent.getService(
+                        this,
+                        REQUEST_CODE,
+                        getDeleteIntent(this, uri),
+                        PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE))
+                .build();
+
         Bundle extras = new Bundle();
         extras.putString(Notification.EXTRA_SUBSTITUTE_APP_NAME, strings().getTitle());
 
@@ -448,6 +480,7 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
                         viewIntent,
                         PendingIntent.FLAG_IMMUTABLE))
                 .addAction(shareAction)
+                .addAction(deleteAction)
                 .setAutoCancel(true)
                 .setGroup(GROUP_KEY_SAVED)
                 .addExtras(extras);
@@ -603,6 +636,33 @@ public class RecordingService extends Service implements ScreenMediaRecorderList
         return new Intent(context, this.getClass()).setAction(ACTION_SHARE)
                 .putExtra(EXTRA_PATH, path)
                 .putExtra(EXTRA_NOTIFICATION_ID, mNotificationId);
+    }
+
+    /**
+     * Get an intent to delete a saved recording, along with its notification.
+     */
+    protected Intent getDeleteIntent(Context context, Uri path) {
+        return new Intent(context, this.getClass()).setAction(ACTION_DELETE)
+                .setData(path)
+                .putExtra(EXTRA_NOTIFICATION_ID, mNotificationId);
+    }
+
+    /**
+     * Dismisses the saved recordings group summary when the last notification of the group is
+     * gone. The cancelled notification may still show up in activeNotifications, so exclude it
+     * explicitly.
+     */
+    private void maybeDismissSavedGroup(UserHandle currentUser, int deletedNotificationId) {
+        for (StatusBarNotification notification : mNotificationManager.getActiveNotifications()) {
+            if (notification.getId() != NOTIF_GROUP_ID_SAVED
+                    && notification.getId() != deletedNotificationId
+                    && GROUP_KEY_SAVED.equals(notification.getNotification().getGroup())) {
+                return;
+            }
+        }
+        mNotificationManager.cancelAsUser(getTag(), NOTIF_GROUP_ID_SAVED, currentUser);
+        // Close quick shade
+        closeSystemDialogs();
     }
 
     @Override

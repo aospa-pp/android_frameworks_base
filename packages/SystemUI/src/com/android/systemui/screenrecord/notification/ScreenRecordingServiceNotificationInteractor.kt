@@ -23,7 +23,9 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Icon
 import android.media.projection.StopReason
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import androidx.media3.common.MimeTypes
 import com.android.systemui.res.R
 import com.android.systemui.screencapture.ScreenCaptureUiReceiver
@@ -170,6 +172,22 @@ constructor(
                 )
                 .build()
 
+        val deleteAction: Notification.Action =
+            Notification.Action.Builder(
+                    Icon.createWithResource(context, R.drawable.ic_screenrecord),
+                    strings.deleteLabel,
+                    PendingIntent.getService(
+                        context,
+                        REQUEST_CODE,
+                        Intent(context, ScreenRecordingService::class.java)
+                            .setAction(ScreenRecordingService.ACTION_DELETE)
+                            .setData(savedRecording.uri)
+                            .putExtra(ScreenRecordingService.EXTRA_NOTIFICATION_ID, notificationId),
+                        PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+                    ),
+                )
+                .build()
+
         val builder: Notification.Builder =
             Notification.Builder(context, CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_screenrecord)
@@ -184,6 +202,7 @@ constructor(
                     )
                 )
                 .addAction(shareAction)
+                .addAction(deleteAction)
                 .setAutoCancel(true)
                 .setGroup(GROUP_KEY_SAVED)
                 .addExtras(
@@ -231,6 +250,35 @@ constructor(
         notificationManager.cancel(notificationId)
     }
 
+    /**
+     * Deletes the saved recording, cancels its notification and dismisses the group summary when
+     * the last notification of the group is gone. Called when the user taps the delete action of
+     * the saved recording notification.
+     */
+    override fun deleteSavedRecording(notificationId: Int, uri: Uri?) {
+        if (uri != null) {
+            try {
+                context.contentResolver.delete(uri, null, null)
+            } catch (throwable: Throwable) {
+                Log.w(TAG, "Failed to delete recording $uri", throwable)
+            }
+        }
+        notificationManager.cancel(notificationId)
+        // Dismiss the group summary when the last notification of the group is gone. The cancelled
+        // notification may still show up in activeNotifications, so exclude it explicitly.
+        val hasChildren =
+            notificationManager.activeNotifications.any {
+                it.id != NOTIF_GROUP_ID_SAVED &&
+                    it.id != notificationId &&
+                    it.notification.group == GROUP_KEY_SAVED
+            }
+        if (!hasChildren) {
+            notificationManager.cancel(NOTIF_GROUP_ID_SAVED)
+            // Close quick shade
+            context.closeSystemDialogs()
+        }
+    }
+
     private fun createErrorNotification(
         notificationContentTitle: String,
         groupKey: String,
@@ -273,5 +321,6 @@ constructor(
 
     companion object {
         const val CHANNEL_ID = "screen_record"
+        private const val TAG = "ScreenRecordingServiceNotif"
     }
 }

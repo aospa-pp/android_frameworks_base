@@ -109,6 +109,13 @@ open class ScreenRecordingService : ComponentService() {
                         intent.getIntExtra(EXTRA_STOP_REASON, StopReason.STOP_UNKNOWN),
                     )
                 }
+            ACTION_DELETE ->
+                coroutineScope.launch(backgroundContext) {
+                    notificationInteractor.deleteSavedRecording(
+                        intent.getIntExtra(EXTRA_NOTIFICATION_ID, -1),
+                        intent.data,
+                    )
+                }
         }
         return START_NOT_STICKY
     }
@@ -270,8 +277,12 @@ open class ScreenRecordingService : ComponentService() {
 
         const val ACTION_STOP =
             "com.android.systemui.screenrecord.ScreenRecordingService.ACTION_STOP"
+        const val ACTION_DELETE =
+            "com.android.systemui.screenrecord.ScreenRecordingService.ACTION_DELETE"
         const val EXTRA_STOP_REASON =
             "com.android.systemui.screenrecord.ScreenRecordingService.EXTRA_STOP_REASON"
+        const val EXTRA_NOTIFICATION_ID =
+            "com.android.systemui.screenrecord.ScreenRecordingService.EXTRA_NOTIFICATION_ID"
     }
 }
 

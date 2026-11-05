@@ -17,6 +17,7 @@
 package com.android.systemui.screenrecord.notification
 
 import android.app.Notification
+import android.net.Uri
 import com.android.systemui.screenrecord.ScreenMediaRecorder.SavedRecording
 import com.android.systemui.screenrecord.ScreenRecordingAudioSource
 
@@ -34,4 +35,10 @@ interface NotificationInteractor {
     fun notifyErrorStarting(notificationId: Int)
 
     fun cancel(notificationId: Int)
+
+    /**
+     * Deletes the saved recording, cancels its notification and dismisses the group summary when
+     * the last notification of the group is gone.
+     */
+    fun deleteSavedRecording(notificationId: Int, uri: Uri?) {}
 }

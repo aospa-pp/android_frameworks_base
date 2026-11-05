@@ -47,4 +47,6 @@ open class RecordingServiceStrings(private val res: Resources) {
         get() = res.getString(R.string.screenrecord_stop_label)
     val shareLabel
         get() = res.getString(R.string.screenrecord_share_label)
+    val deleteLabel
+        get() = res.getString(R.string.screenshot_delete_label)
 }
