@@ -558,6 +558,12 @@ internal constructor(
                     }
 
                     logScreenshotResultStatus(result.uri, screenshot.userHandle)
+                    // Also post a notification with a preview, so the user can quickly access
+                    // every screenshot without digging through the gallery.
+                    val bitmap = screenshot.bitmap
+                    if (result.uri != null && bitmap != null) {
+                        notificationController.showPostActionNotification(result.uri, bitmap)
+                    }
                     onResult.accept(result)
                     if (LogConfig.DEBUG_CALLBACK) {
                         Log.d(TAG, "finished bg processing, calling back with uri: ${result.uri}")
