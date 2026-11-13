@@ -47,13 +47,16 @@ import com.android.systemui.statusbar.pipeline.mobile.domain.model.SignalIconMod
 import com.android.systemui.statusbar.pipeline.shared.data.model.ConnectivitySlot
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepository
 import com.android.systemui.statusbar.policy.data.repository.UserSetupRepository
+import com.android.systemui.tuner.TunerService
 import com.android.systemui.util.CarrierConfigTracker
 import com.android.systemui.util.kotlin.mapDirect
 import com.android.systemui.util.CarrierNameCustomization
+import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import java.lang.ref.WeakReference
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
@@ -175,12 +178,27 @@ constructor(
     private val context: Context,
     private val featureFlagsClassic: FeatureFlagsClassic,
     val carrierNameCustomization: CarrierNameCustomization,
+    private val tunerService: TunerService,
 ) : MobileIconsInteractor {
     // Weak reference lookup for created interactors
     private val reuseCache = mutableMapOf<Int, WeakReference<MobileIconInteractor>>()
     private var ddsIcon: StateFlow<SignalIconModel?> = MutableStateFlow(null)
-    private val enableStackedIcon: Boolean =
+
+    // Stacked (dual SIM) signal icon, toggled from the status bar icon tuner and defaulting to
+    // the value of config_enable_stacked_icon.
+    private val stackedIconDefault: Boolean =
         context.resources.getBoolean(R.bool.config_enable_stacked_icon)
+    private val enableStackedIcon: Flow<Boolean> = conflatedCallbackFlow {
+        val callback =
+            object : TunerService.Tunable {
+                override fun onTuningChanged(key: String, newValue: String?) {
+                    trySend(TunerService.parseIntegerSwitch(newValue, stackedIconDefault))
+                }
+            }
+        tunerService.addTunable(callback, KEY_STACKED_ICON)
+        awaitClose { tunerService.removeTunable(callback) }
+    }
+
     override fun setDdsIconFLow(iconFlow: StateFlow<SignalIconModel?>) {
         ddsIcon = iconFlow
     }
@@ -330,19 +348,27 @@ constructor(
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), emptyList())
     override val isStackable =
-        if (NewStatusBarIcons.isEnabled && enableStackedIcon) {
-            icons.flatMapLatest { icons ->
-                if (icons.isEmpty()) {
+        if (NewStatusBarIcons.isEnabled) {
+            enableStackedIcon.flatMapLatest { stackedIconEnabled ->
+                if (!stackedIconEnabled) {
                     flowOf(false)
                 } else {
-                    combine(icons.map { it.signalLevelIcon }) { signalLevelIcons ->
-                        // These are only stackable if:
-                        // - They are cellular
-                        // - There's exactly two
-                        // - They have the same number of levels
-                        signalLevelIcons
-                            .filterIsInstance<SignalIconModel.CellularTypeIconModel.Cellular>()
-                            .let { it.size == 2 && it[0].numberOfLevels == it[1].numberOfLevels }
+                    icons.flatMapLatest { icons ->
+                        if (icons.isEmpty()) {
+                            flowOf(false)
+                        } else {
+                            combine(icons.map { it.signalLevelIcon }) { signalLevelIcons ->
+                                // These are only stackable if:
+                                // - They are cellular
+                                // - There's exactly two
+                                // - They have the same number of levels
+                                signalLevelIcons
+                                    .filterIsInstance<SignalIconModel.CellularTypeIconModel.Cellular>()
+                                    .let {
+                                        it.size == 2 && it[0].numberOfLevels == it[1].numberOfLevels
+                                    }
+                            }
+                        }
                     }
                 }
             }
@@ -527,5 +553,6 @@ constructor(
             .also { reuseCache[subId] = WeakReference(it) }
     companion object {
         private const val LOGGING_PREFIX = "Intr"
+        private const val KEY_STACKED_ICON = "status_bar_stacked_icon"
     }
 }
