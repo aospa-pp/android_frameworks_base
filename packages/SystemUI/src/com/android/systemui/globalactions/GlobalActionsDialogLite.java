@@ -77,6 +77,8 @@ import android.telephony.TelephonyCallback;
 import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
+import android.view.Display;
+import android.view.DisplayCutout;
 import android.view.GestureDetector;
 import android.view.IWindowManager;
 import android.view.LayoutInflater;
@@ -85,6 +87,7 @@ import android.view.Surface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
+import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.accessibility.AccessibilityManager;
@@ -2897,6 +2900,20 @@ public class GlobalActionsDialogLite implements DialogInterface.OnDismissListene
             container.setOnTouchListener((v, event) -> {
                 mGestureDetector.onTouchEvent(event);
                 return v.onTouchEvent(event);
+            });
+            // Match the vertical position of the advanced reboot menu (GlobalActionsPowerDialog).
+            // That dialog's window is inset by the display cutout, so its content is centered in
+            // the stable area below the cutout. This window uses
+            // LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS, so the cutout inset is not reported to it.
+            // Apply the cutout as top padding and, when this window extends behind the navigation
+            // bar, compensate with the navigation bar inset as bottom padding. Consume the insets
+            // so the content view does not apply them a second time.
+            final Display display = dialog.getContext().getDisplay();
+            final DisplayCutout cutout = display != null ? display.getCutout() : null;
+            final int cutoutTop = cutout != null ? cutout.getSafeInsetTop() : 0;
+            container.setOnApplyWindowInsetsListener((v, windowInsets) -> {
+                v.setPadding(0, cutoutTop, 0, windowInsets.getStableInsetBottom());
+                return WindowInsets.CONSUMED;
             });
 
             View overflowButton = dialog.findViewById(
