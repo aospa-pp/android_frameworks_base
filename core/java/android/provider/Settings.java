@@ -6996,6 +6996,14 @@ public final class Settings {
         public static final String POCKET_JUDGE = "pocket_judge";
 
         /**
+         * Which Quick Settings implementation SystemUI should use.
+         *   0 = stock AOSP Quick Settings
+         *   1 = Axion Quick Settings
+         * @hide
+         */
+        public static final String AXION_QS_ENABLED = "axion_qs_enabled";
+
+        /**
          * @hide
          */
         public static final String SCREENSHOT_SHUTTER_SOUND = "screenshot_shutter_sound";
@@ -7284,6 +7292,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(MOUSE_SCROLLING_ACCELERATION);
             PRIVATE_SETTINGS.add(MOUSE_SCROLLING_SPEED);
             PRIVATE_SETTINGS.add(POCKET_JUDGE);
+            PRIVATE_SETTINGS.add(AXION_QS_ENABLED);
             PRIVATE_SETTINGS.add(GESTURES_ENABLED);
             PRIVATE_SETTINGS.add(GESTURE_DOUBLE_TAP);
             PRIVATE_SETTINGS.add(GESTURE_SINGLE_TAP);

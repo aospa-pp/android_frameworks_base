@@ -58,6 +58,7 @@ import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.service.dreams.IDreamManager;
 import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
@@ -144,6 +145,7 @@ import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.power.domain.interactor.PowerInteractor;
 import com.android.systemui.qs.ax.fragment.AxQsFragmentCompose;
+import com.android.systemui.qs.composefragment.QSFragmentCompose;
 import com.android.systemui.res.R;
 import com.android.systemui.scene.domain.interactor.WindowRootViewVisibilityInteractor;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
@@ -1181,9 +1183,21 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
     }
 
     protected QS createDefaultQSFragment() {
+        final boolean useAxionQs =
+                Settings.System.getIntForUser(
+                        mContext.getContentResolver(),
+                        Settings.System.AXION_QS_ENABLED,
+                        1 /* default to the Axion Quick Settings */,
+                        UserHandle.USER_CURRENT)
+                        != 0;
+        if (useAxionQs) {
+            return mFragmentService
+                    .getFragmentHostManager(getNotificationShadeWindowView())
+                    .create(AxQsFragmentCompose.class);
+        }
         return mFragmentService
                 .getFragmentHostManager(getNotificationShadeWindowView())
-                .create(AxQsFragmentCompose.class);
+                .create(QSFragmentCompose.class);
     }
 
     private void setUpPresenter() {
