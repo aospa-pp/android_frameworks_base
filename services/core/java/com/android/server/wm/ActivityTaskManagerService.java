@@ -1983,7 +1983,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     .setCaller(caller)
                     .setCallingUid(callingUid)
                     .setCallingPid(callingPid)
-                    .setCallingPackage(intent.getPackage())
+                    .setCallingPackage(callingPackage)
                     .setCallingFeatureId(callingFeatureId)
                     .setUserId(userId)
                     .setActivityOptions(safeOptions)
