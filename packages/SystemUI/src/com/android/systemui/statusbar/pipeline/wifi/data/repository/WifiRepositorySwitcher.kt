@@ -139,6 +139,10 @@ constructor(
         activeRepo.value.enableWifi()
     }
 
+    override fun disableWifi() {
+        activeRepo.value.disableWifi()
+    }
+
     override fun pauseWifi() {
         activeRepo.value.pauseWifi()
     }

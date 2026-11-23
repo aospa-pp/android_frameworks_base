@@ -510,6 +510,12 @@ constructor(
         scanForWifi()
     }
 
+    override fun disableWifi() {
+        cancelOptimisticToggleTimeoutJobs()
+        _wifiToggleState.value = WifiToggleState.Normal
+        wifiManager.setWifiEnabled(false)
+    }
+
     private fun logOnWifiEntriesChanged(connectedEntry: WifiEntry?) {
         inputLogger.log(
             TAG,
