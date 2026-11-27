@@ -142,6 +142,13 @@ public class QtiBackgroundManager {
     }
 
     private void syncAppFreezerStateWithUiFluencyMode() {
+        // The fluency mode disables the AOSP cached-app freezer so that QTI's own package and
+        // process level freezers don't fight it over the same cgroups.  Only do that when
+        // either of those freezers is actually enabled; with both off, the AOSP freezer (with
+        // its hasShownUi exemption) manages freezing and the setting is left untouched.
+        if (!mUsePackageLevelFreezer && !mUseProcessLevelFreezer) {
+            return;
+        }
         final String targetState = mUseUiFluencyMode ? "disabled" : "enabled";
         final String currentState = Settings.Global.getString(
                 mContentResolver, Settings.Global.CACHED_APPS_FREEZER_ENABLED);
